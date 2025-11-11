@@ -1,5 +1,5 @@
 import React from 'react'
-import Checkout from '../Checkout'
+import Checkout from './Checkout'
 
 function App() {
   return (
