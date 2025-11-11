@@ -15,10 +15,10 @@ export function useAuth() {
     const userData = localStorage.getItem('user');
     if (userData) {
       setUser(JSON.parse(userData));
-    } else {
-      setUser({ id: '1', name: 'Usuário', email: 'usuario@email.com' });
     }
   }, []);
 
-  return { user };
+  const isAuthenticated = !!user;
+
+  return { user, isAuthenticated };
 }

@@ -1,13 +1,14 @@
 import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Button } from "./components/ui/button";
+import { Card } from "./components/ui/card";
 import { ArrowLeft, Package } from "lucide-react";
-import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "./lib/trpc";
+import { useAuth } from "./hooks/useAuth";
 
 export default function Orders() {
   const { isAuthenticated } = useAuth();
-  const { data: orders, isLoading } = trpc.orders.list.useQuery(undefined, {
+  // Use any temporariamente
+  const { data: orders, isLoading } = (trpc as any).orders.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
 

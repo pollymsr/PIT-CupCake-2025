@@ -1,14 +1,21 @@
-
-export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "App";
+// const.ts - versão simplificada
+export const APP_TITLE = "Cupcake Pit";
 
 export const APP_LOGO = "https://placehold.co/128x128/E1E7EF/1F2937?text=App";
 
 // Generate login URL at runtime so redirect URI reflects the current origin.
 export const getLoginUrl = () => {
-  const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
-  const appId = import.meta.env.VITE_APP_ID;
+  // Verifica se estamos no cliente (navegador)
+  if (typeof window === 'undefined') {
+    return "";
+  }
+  
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
   const state = btoa(redirectUri);
+
+  // URLs hardcoded temporariamente
+  const oauthPortalUrl = "https://oauth.example.com";
+  const appId = "cupcake-app";
 
   const url = new URL(`${oauthPortalUrl}/app-auth`);
   url.searchParams.set("appId", appId);

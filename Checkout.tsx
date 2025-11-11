@@ -5,7 +5,6 @@ import { useCart } from "./CartContext";
 import { useAuth } from "./hooks/useAuth";
 import { trpc } from "./lib/trpc";
 
-// Implementações temporárias para Button e Card (até você criar os componentes reais)
 const Button = ({ children, variant, size, className, ...props }: any) => (
   <button 
     className={`

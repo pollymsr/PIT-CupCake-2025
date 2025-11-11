@@ -36,4 +36,8 @@ export interface User {
   role: 'user' | 'admin';
 }
 
-export type { APIError } from "./_core/errors";
+export interface APIError {
+  message: string;
+  code?: string;
+}
+

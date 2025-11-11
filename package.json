@@ -16,6 +16,12 @@
     "@trpc/client": "^11.7.1",
     "@trpc/react-query": "^11.7.1",
     "@trpc/server": "^11.7.1",
+    "axios": "^1.13.2",
+    "cookie": "^1.0.2",
+    "dotenv": "^17.2.3",
+    "drizzle-kit": "^0.31.6",
+    "express": "^5.1.0",
+    "jose": "^6.1.1",
     "lucide-react": "^0.553.0",
     "mongoose": "^8.19.3",
     "react": "^18.2.0",
@@ -23,6 +29,8 @@
     "wouter": "^2.12.1"
   },
   "devDependencies": {
+    "@types/cookie": "^1.0.0",
+    "@types/express": "^5.0.5",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",

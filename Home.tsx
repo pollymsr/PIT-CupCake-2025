@@ -1,9 +1,9 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "./hooks/useAuth";  // Mude de @/_core/hooks/useAuth
+import { Button } from "components/ui/button";  // Mude de @/components/ui/button
 import { Link } from "wouter";
-import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
+import { APP_LOGO, APP_TITLE, getLoginUrl } from "./const";  // Mude de @/const
 import { ShoppingCart, Star, LogIn } from "lucide-react";
-import { useTestAuth } from "@/context/TestAuthContext";
+import { useTestAuth } from "context/TestAuthContext";  // Mude de @/context/TestAuthContext
 
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
