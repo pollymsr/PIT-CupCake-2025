@@ -1,14 +1,13 @@
-// main.tsx
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
-import { TestAuthProvider } from './context/TestAuthContext' // Importe o Provider
+import { TestAuthProvider } from './context/TestAuthContext'
 
 const container = document.getElementById('root')
 const root = createRoot(container!)
 root.render(
   <React.StrictMode>
-    <TestAuthProvider> {/* Envolva o App com o Provider */}
+    <TestAuthProvider>
       <App />
     </TestAuthProvider>
   </React.StrictMode>

@@ -1,13 +1,14 @@
-import { useAuth } from "./hooks/useAuth";
-import { Button } from "./components/ui/button";
-import { Link } from "wouter";
+// Home.tsx
+import React from 'react'
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "./const"; 
-import { ShoppingCart, Star, LogIn } from "lucide-react";
-import { useTestAuth } from "./context/TestAuthContext"; 
+import { ShoppingCart, Star, LogIn, Link } from "lucide-react";
+import { useTestAuth } from "./context/TestAuthContext"; // ✅ Agora vai funcionar
+import { useAuth } from './hooks/useAuth';
+import { Button } from './components/ui/button';
 
 export default function Home() {
-  const { user, isAuthenticated } = useAuth();
-  const { loginAsTestUser } = useTestAuth();
+   const { user, isAuthenticated } = useAuth();
+  const { loginAsTestUser } = useTestAuth(); // ✅ Agora vai funcionar
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-pink-50 to-white">
