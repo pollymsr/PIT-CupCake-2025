@@ -1,4 +1,3 @@
-// vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
@@ -9,10 +8,17 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./"),
     },
+    extensions: ['.tsx', '.ts', '.jsx', '.js']
+  },
+  define: {
+    'process.env': {}
   },
   build: {
     outDir: "dist",
-    sourcemap: false
+    emptyOutDir: true,
+    rollupOptions: {
+      external: []
+    }
   },
   base: './'
 });

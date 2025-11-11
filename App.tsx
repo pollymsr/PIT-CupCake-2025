@@ -1,10 +1,11 @@
+// App.tsx
 import React from 'react'
-import Checkout from './Checkout'
+import Home from './Home'
 
 function App() {
   return (
     <div>
-      <Checkout />
+      <Home />
     </div>
   )
 }

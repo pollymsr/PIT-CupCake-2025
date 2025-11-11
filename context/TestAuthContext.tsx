@@ -5,7 +5,7 @@ interface TestAuthContextType {
   loginAsTestUser: () => void;
 }
 
-const TestAuthContext = createContext<TestAuthContextType | undefined>(undefined);
+export const TestAuthContext = createContext<TestAuthContextType | undefined>(undefined);
 
 export function TestAuthProvider({ children }: { children: ReactNode }) {
   const loginAsTestUser = () => {
@@ -19,12 +19,4 @@ export function TestAuthProvider({ children }: { children: ReactNode }) {
       {children}
     </TestAuthContext.Provider>
   );
-}
-
-export function useTestAuth() {
-  const context = useContext(TestAuthContext);
-  if (!context) {
-    throw new Error('useTestAuth must be used within a TestAuthProvider');
-  }
-  return context;
 }
