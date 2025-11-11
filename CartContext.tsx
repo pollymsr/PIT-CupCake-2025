@@ -40,10 +40,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [cart]);
 
   const addToCart = (item: CartItem) => {
-    setCart(prevCart => {
-      const existingItem = prevCart.find(i => i.id === item.id);
+    setCart((prevCart: any[]) => {
+      const existingItem = prevCart.find((i) => i.id === item.id);
       if (existingItem) {
-        return prevCart.map(i =>
+        return prevCart.map((i) =>
           i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
         );
       }
@@ -52,17 +52,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const removeFromCart = (id: string) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== id));
+    setCart((prevCart: any[]) =>
+      prevCart.filter((item: { id: string }) => item.id !== id)
+    );
   };
 
   const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(id);
     } else {
-      setCart(prevCart =>
-        prevCart.map(item =>
-          item.id === id ? { ...item, quantity } : item
-        )
+      setCart((prevCart: CartItem[]) =>
+        prevCart.map((item) => (item.id === id ? { ...item, quantity } : item))
       );
     }
   };
@@ -71,10 +71,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart([]);
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cart.reduce(
+    (sum: number, item: { price: number; quantity: number }) =>
+      sum + item.price * item.quantity,
+    0
+  );
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, total }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        total,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

@@ -19,15 +19,15 @@ export interface ICupcake extends Document {
 }
 
 export interface IOrder extends Document {
-  userId: mongoose.Types.ObjectId; // Referência ao User
+  userId: mongoose.Types.ObjectId;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   totalAmount: number;
   createdAt: Date;
 }
 
 export interface IOrderItem extends Document {
-  orderId: mongoose.Types.ObjectId; // Referência à Order
-  cupcakeId: mongoose.Types.ObjectId; // Referência ao Cupcake
+  orderId: mongoose.Types.ObjectId;
+  cupcakeId: mongoose.Types.ObjectId;
   quantity: number;
   priceAtOrder: number;
 }
@@ -52,7 +52,11 @@ const CupcakeSchema: Schema = new Schema({
 
 const OrderSchema: Schema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  status: { type: String, enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'], default: 'pending' },
+  status: { 
+    type: String, 
+    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'], 
+    default: 'pending' 
+  },
   totalAmount: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now },
 });
@@ -65,13 +69,12 @@ const OrderItemSchema: Schema = new Schema({
 });
 
 // 3. Modelos do Mongoose
-export const UserModel: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
-export const CupcakeModel: Model<ICupcake> = mongoose.model<ICupcake>('Cupcake', CupcakeSchema);
-export const OrderModel: Model<IOrder> = mongoose.model<IOrder>('Order', OrderSchema);
-export const OrderItemModel: Model<IOrderItem> = mongoose.model<IOrderItem>('OrderItem', OrderItemSchema);
+export const User = mongoose.model<IUser>('User', UserSchema);
+export const Cupcake = mongoose.model<ICupcake>('Cupcake', CupcakeSchema);
+export const Order = mongoose.model<IOrder>('Order', OrderSchema);
+export const OrderItem = mongoose.model<IOrderItem>('OrderItem', OrderItemSchema);
 
-// 4. Tipos de Inserção (para manter a compatibilidade com a lógica de negócios existente)
-// No Mongoose, a interface do modelo é usada para inserção.
+// 4. Tipos de Inserção
 export type InsertUser = Omit<IUser, '_id' | 'lastSignedIn' | 'role'> & Partial<Pick<IUser, 'lastSignedIn' | 'role'>>;
 export type InsertCupcake = Omit<ICupcake, '_id'>;
 export type InsertOrder = Omit<IOrder, '_id' | 'createdAt'> & Partial<Pick<IOrder, 'createdAt'>>;

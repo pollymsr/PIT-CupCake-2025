@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
-import { Cupcake, ICupcake, User, IUser, Order, IOrder, IOrderItem } from './models';
-import { ENV } from './_core/env';
+import { User, IUser, Cupcake, ICupcake, Order, IOrder, OrderItem, IOrderItem } from './models';
+import { ENV } from './env';
+
 
 // 1. Conexão com o Banco de Dados
 export async function connectDb() {
