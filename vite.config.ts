@@ -1,29 +1,18 @@
 // vite.config.ts
-const { defineConfig } = require('vite');
-const react = require('@vitejs/plugin-react');
-const path = require('path');
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
-module.exports = defineConfig({
+export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./"),
     },
   },
-  define: {
-    'process.env': {}
-  },
   build: {
-    outDir: 'dist',
-    sourcemap: false,
-    rollupOptions: {
-      input: {
-        main: './index.html'
-      }
-    }
+    outDir: "dist",
+    sourcemap: false
   },
-
-  server: {
-    historyApiFallback: true
-  }
+  base: './'
 });
