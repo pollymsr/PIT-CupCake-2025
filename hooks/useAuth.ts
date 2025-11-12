@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 
 interface User {
+  [x: string]: ReactNode;
   id: string;
   name: string;
   email: string;

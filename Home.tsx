@@ -1,5 +1,6 @@
 // Home.tsx
 import React from 'react';
+import { Link } from 'wouter';
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "./const"; 
 import { ShoppingCart, Star, Truck, Heart, ChevronRight, Cake, LogIn, MessageSquare, Award } from "lucide-react";
 import { useTestAuth } from "./context/TestAuthContext";
@@ -40,7 +41,7 @@ export default function Home() {
   ];
   // --- Fim Dados Aprimorados ---
 
-    interface StarRatingProps {
+  interface StarRatingProps {
     rating: number;
   }
 
@@ -66,19 +67,19 @@ export default function Home() {
             <h1 className="text-2xl font-extrabold text-gray-800 tracking-tight">{APP_TITLE || "Polly's Cupcakes"}</h1>
           </div>
           <nav className="flex items-center space-x-8">
-            <a href="#" className="text-gray-600 hover:text-pink-600 transition-colors font-medium">
+            <Link href="/menu" className="text-gray-600 hover:text-pink-600 transition-colors font-medium">
               Cardápio
-            </a>
+            </Link>
             <a href="#" className="text-gray-600 hover:text-pink-600 transition-colors font-medium">
               Sobre Nós
             </a>
             <a href="#" className="text-gray-600 hover:text-pink-600 transition-colors font-medium">
               Contato
             </a>
-            <button className="flex items-center space-x-1 text-gray-600 hover:text-pink-600 transition-colors">
+            <Link href="/checkout" className="flex items-center space-x-1 text-gray-600 hover:text-pink-600 transition-colors">
               <ShoppingCart className="w-5 h-5" />
               <span className="hidden sm:inline">Carrinho (0)</span>
-            </button>
+            </Link>
             <button 
               onClick={loginAsTestUser}
               className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center space-x-2 text-sm font-semibold"
@@ -106,10 +107,10 @@ export default function Home() {
                 Feitos com os melhores ingredientes e paixão em cada detalhe. Peça agora e transforme seu dia!
               </p>
               <div className="flex space-x-4">
-                <button className="bg-pink-600 text-white px-8 py-4 rounded-full hover:bg-pink-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 flex items-center space-x-2 font-bold text-lg">
+                <Link href="/menu" className="bg-pink-600 text-white px-8 py-4 rounded-full hover:bg-pink-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 flex items-center space-x-2 font-bold text-lg">
                   <span>Ver Cardápio Completo</span>
                   <ChevronRight className="w-5 h-5" />
-                </button>
+                </Link>
                 <button className="border-2 border-pink-600 text-pink-600 px-8 py-4 rounded-full hover:bg-pink-600 hover:text-white transition-colors duration-300 font-semibold text-lg">
                   Nossas Histórias
                 </button>
@@ -222,9 +223,9 @@ export default function Home() {
           <p className="text-pink-100 text-xl mb-10 max-w-3xl mx-auto">
             Seja para uma festa, um presente ou um mimo pessoal, a Polly's Cupcakes tem o sabor perfeito para você.
           </p>
-          <button className="bg-white text-pink-600 px-10 py-4 rounded-full hover:bg-gray-100 transition-colors font-extrabold text-xl shadow-2xl transform hover:scale-105">
+          <Link href="/menu" className="bg-white text-pink-600 px-10 py-4 rounded-full hover:bg-gray-100 transition-colors font-extrabold text-xl shadow-2xl transform hover:scale-105 inline-block">
             FAZER MEU PEDIDO AGORA
-          </button>
+          </Link>
         </div>
       </section>
 
