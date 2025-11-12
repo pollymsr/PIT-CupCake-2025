@@ -8,6 +8,8 @@ export interface IUser extends Document {
   loginMethod?: string | null;
   lastSignedIn: Date;
   role: 'user' | 'admin';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ICupcake extends Document {
