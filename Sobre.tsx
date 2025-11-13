@@ -1,3 +1,4 @@
+//sobre.tsx
 import React from 'react';
 import { Link } from 'wouter';
 import { Cake, Heart, Users, Target, MapPin } from 'lucide-react';
