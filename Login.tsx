@@ -1,4 +1,4 @@
-// Login.tsx - Versão Client-Side
+// Login.tsx - Versão Client-Side CORRIGIDA
 import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { Cake, LogIn, Mail, Lock, Eye, EyeOff, User, UserPlus } from 'lucide-react';

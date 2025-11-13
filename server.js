@@ -1,48 +1,42 @@
-// server.js
+// server.js (na raiz do projeto)
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Conexão com MongoDB (use suas credenciais existentes)
-const DATABASE_URL = process.env.DATABASE_URL || 'mongodb+srv://popollymsr_db_user:hAFQUYBwzB7tq8A9@cluster0.k0obyd5.mongodb.net/pollyscupcakes?retryWrites=true&w=majority';
+// Conexão com MongoDB
+const DATABASE_URL = 'mongodb+srv://popollymsr_db_user:hAFQUYBwzB7tq8A9@cluster0.k0obyd5.mongodb.net/pollyscupcakes?retryWrites=true&w=majority';
 
 mongoose.connect(DATABASE_URL)
   .then(() => console.log('✅ Conectado ao MongoDB'))
   .catch(err => console.error('❌ Erro ao conectar MongoDB:', err));
 
-// Models (baseado no seu models.ts)
+// Schema do User
 const UserSchema = new mongoose.Schema({
   openId: { type: String, required: true, unique: true },
   name: { type: String },
-  email: { type: String, unique: true, sparse: true },
+  email: { type: String, unique: true },
   password: { type: String },
-  loginMethod: { type: String, default: null },
+  loginMethod: { type: String, default: 'email' },
   lastSignedIn: { type: Date, default: Date.now },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
 }, { timestamps: true });
 
 const User = mongoose.model('User', UserSchema);
 
-// Rotas de Autenticação
+// Rotas
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Todos os campos são obrigatórios' });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'A senha deve ter pelo menos 6 caracteres' });
     }
 
     const existingUser = await User.findOne({ email });
@@ -56,8 +50,7 @@ app.post('/api/auth/register', async (req, res) => {
       openId: email,
       name,
       email,
-      password: hashedPassword,
-      loginMethod: 'email'
+      password: hashedPassword
     });
 
     await user.save();
@@ -66,8 +59,7 @@ app.post('/api/auth/register', async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role,
-      createdAt: user.createdAt
+      role: user.role
     };
 
     res.status(201).json({
@@ -106,8 +98,7 @@ app.post('/api/auth/login', async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role,
-      lastSignedIn: user.lastSignedIn
+      role: user.role
     };
 
     res.status(200).json({
