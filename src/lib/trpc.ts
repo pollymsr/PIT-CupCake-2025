@@ -1,5 +1,19 @@
-// lib/trpc.ts
-import { createTRPCReact } from '@trpc/react-query';
-import type { AppRouter } from '../../routers';
-
-export const trpc = createTRPCReact<AppRouter>();
+// Mock temporário para tRPC
+export const trpc = {
+  cupcakes: {
+    list: {
+      useQuery: () => ({ 
+        data: [], 
+        isLoading: false 
+      })
+    }
+  },
+  orders: {
+    list: {
+      useQuery: () => ({ 
+        data: [], 
+        isLoading: false 
+      })
+    }
+  }
+} as any;

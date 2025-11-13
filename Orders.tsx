@@ -1,13 +1,72 @@
 import { Link } from "wouter";
-import { Button } from "src/components/ui/button";
-import { Card } from "src/components/ui/card";
 import { ArrowLeft, Package } from "lucide-react";
-import { trpc } from "src/lib/trpc";
 import { useAuth } from "./hooks/useAuth";
+
+// Componentes locais
+const Button = ({ children, variant, size, className, ...props }: any) => (
+  <button 
+    className={`
+      inline-flex items-center justify-center rounded-md font-medium transition-colors
+      ${variant === 'ghost' ? 'bg-transparent hover:bg-gray-100' : 'bg-pink-500 text-white hover:bg-pink-600'}
+      ${size === 'icon' ? 'p-2' : 'px-4 py-2'}
+      ${size === 'sm' ? 'text-sm' : 'text-base'}
+      disabled:opacity-50 disabled:cursor-not-allowed
+      ${className}
+    `}
+    {...props}
+  >
+    {children}
+  </button>
+);
+
+const Card = ({ children, className, ...props }: any) => (
+  <div className={`bg-white rounded-lg border border-gray-200 shadow-sm p-6 ${className}`} {...props}>
+    {children}
+  </div>
+);
+
+// Mock do trpc
+const trpc = {
+  orders: {
+    list: {
+      useQuery: () => ({ 
+        data: [
+          {
+            _id: 'order_123456',
+            userId: 'user_123',
+            userName: 'João Silva',
+            status: 'delivered',
+            totalAmount: 45.80,
+            paymentMethod: 'credit',
+            customerCity: 'São Paulo',
+            items: [
+              { cupcakeId: '1', cupcakeName: 'Cupcake de Chocolate', quantity: 2, price: 11.5 },
+              { cupcakeId: '3', cupcakeName: 'Cupcake Red Velvet', quantity: 1, price: 12.0 }
+            ],
+            createdAt: '2024-01-15T10:30:00Z'
+          },
+          {
+            _id: 'order_123457',
+            userId: 'user_123',
+            userName: 'João Silva',
+            status: 'processing',
+            totalAmount: 32.90,
+            paymentMethod: 'pix',
+            customerCity: 'São Paulo',
+            items: [
+              { cupcakeId: '4', cupcakeName: 'Cupcake de Morango', quantity: 3, price: 10.5 }
+            ],
+            createdAt: '2024-01-20T14:20:00Z'
+          }
+        ], 
+        isLoading: false 
+      })
+    }
+  }
+};
 
 export default function Orders() {
   const { isAuthenticated } = useAuth();
-  // Use any temporariamente
   const { data: orders, isLoading } = (trpc as any).orders.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
@@ -125,9 +184,14 @@ export default function Orders() {
 
                 <div className="border-t pt-4">
                   <p className="text-sm text-gray-600 mb-2">Itens do Pedido</p>
-                  <p className="text-sm text-gray-700">
-                    {order.items?.length || 0} item(ns) no pedido
-                  </p>
+                  <div className="space-y-2">
+                    {order.items?.map((item: any, index: number) => (
+                      <div key={index} className="flex justify-between text-sm">
+                        <span>{item.quantity}x {item.cupcakeName}</span>
+                        <span>R$ {(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </Card>
             ))}

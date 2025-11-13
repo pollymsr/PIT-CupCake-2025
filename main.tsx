@@ -1,7 +1,7 @@
 // main.tsx (deve estar assim)
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import './src/index.css'
+import './index.css'
 import App from './App'
 import { TestAuthProvider } from './context/TestAuthContext'
 

@@ -1,7 +1,7 @@
 // Home.tsx
 import React from 'react';
 import { Link } from 'wouter';
-import { APP_LOGO, APP_TITLE, getLoginUrl } from "./const"; 
+import { APP_TITLE } from "./const"; 
 import { ShoppingCart, Star, Truck, Heart, ChevronRight, Cake, LogIn, MessageSquare, Award } from "lucide-react";
 import { useTestAuth } from "./context/TestAuthContext";
 

@@ -1,10 +1,91 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Button } from "src/components/ui/button";
-import { Card } from "src/components/ui/card";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
-import { trpc } from "src/lib/trpc";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "./context/CartContext";
+
+// Componentes locais
+const Button = ({ children, variant, size, className, ...props }: any) => (
+  <button 
+    className={`
+      inline-flex items-center justify-center rounded-md font-medium transition-colors
+      ${variant === 'ghost' ? 'bg-transparent hover:bg-gray-100' : 'bg-pink-500 text-white hover:bg-pink-600'}
+      ${size === 'icon' ? 'p-2' : 'px-4 py-2'}
+      ${size === 'sm' ? 'text-sm' : 'text-base'}
+      disabled:opacity-50 disabled:cursor-not-allowed
+      ${className}
+    `}
+    {...props}
+  >
+    {children}
+  </button>
+);
+
+const Card = ({ children, className, ...props }: any) => (
+  <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`} {...props}>
+    {children}
+  </div>
+);
+
+// Mock do trpc
+const trpc = {
+  cupcakes: {
+    list: {
+      useQuery: () => ({ 
+        data: [
+          {
+            _id: '1',
+            name: 'Cupcake de Baunilha',
+            description: 'Macio e leve',
+            price: 9.9,
+            imageUrl: '/images/vanilla.jpg',
+            available: true
+          },
+          {
+            _id: '2', 
+            name: 'Cupcake de Chocolate',
+            description: 'Intenso e cremoso',
+            price: 11.5,
+            imageUrl: '/images/chocolate.jpg',
+            available: true
+          },
+          {
+            _id: '3',
+            name: 'Cupcake Red Velvet',
+            description: 'Clássico red velvet',
+            price: 12.0,
+            imageUrl: '/images/redvelvet.jpg',
+            available: true
+          },
+          {
+            _id: '4',
+            name: 'Cupcake de Morango',
+            description: 'Fresco e frutado',
+            price: 10.5,
+            imageUrl: '/images/strawberry.jpg',
+            available: true
+          },
+          {
+            _id: '5',
+            name: 'Cupcake de Limão',
+            description: 'Refrescante e cítrico',
+            price: 9.5,
+            imageUrl: '/images/lemon.jpg',
+            available: true
+          },
+          {
+            _id: '6',
+            name: 'Cupcake de Café',
+            description: 'Energético e aromático',
+            price: 11.0,
+            imageUrl: '/images/coffee.jpg',
+            available: true
+          }
+        ], 
+        isLoading: false 
+      })
+    }
+  }
+};
 
 export default function Menu() {
   const { data: cupcakes, isLoading } = (trpc as any).cupcakes.list.useQuery();
