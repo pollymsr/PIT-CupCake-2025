@@ -1,4 +1,4 @@
-// App.tsx
+// App.tsx - VERIFIQUE SE ESTÁ COMPLETO
 import React from 'react'
 import { Route, Switch } from 'wouter'
 import { CartProvider } from './context/CartContext'

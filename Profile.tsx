@@ -1,6 +1,6 @@
 // Profile.tsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Cake, User, Mail, Package, Calendar, LogOut } from 'lucide-react';
 
 interface UserData {
@@ -14,6 +14,7 @@ interface UserData {
 export default function Profile() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [, setLocation] = useLocation(); // ✅ Hook para navegação
 
   useEffect(() => {
     // Recuperar dados do usuário do localStorage
@@ -26,7 +27,7 @@ export default function Profile() {
 
   const handleLogout = () => {
     localStorage.removeItem('currentUser');
-    window.location.href = '/';
+    setLocation('/'); // ✅ Use setLocation em vez de window.location.href
   };
 
   if (loading) {

@@ -1,6 +1,6 @@
-// Login.tsx - Versão Client-Side CORRIGIDA
+// Login.tsx - CORRIGIDO para Vercel
 import React, { useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter'; // ✅ Adicione useLocation
 import { Cake, LogIn, Mail, Lock, Eye, EyeOff, User, UserPlus } from 'lucide-react';
 import { useTestAuth } from './context/TestAuthContext';
 
@@ -15,6 +15,7 @@ export default function Login() {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
+  const [, setLocation] = useLocation(); // ✅ Hook para navegação
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -40,9 +41,10 @@ export default function Login() {
         if (user && user.password === formData.password) {
           localStorage.setItem('currentUser', JSON.stringify(user));
           alert('Login realizado com sucesso!');
-          window.location.href = '/profile';
+          setLocation('/profile'); // ✅ Use setLocation em vez de window.location.href
         } else {
           alert('Credenciais inválidas!');
+          setLoading(false);
         }
       } else {
         // Cadastro
@@ -64,7 +66,7 @@ export default function Login() {
           id: Date.now().toString(),
           name: formData.name,
           email: formData.email,
-          password: formData.password, // Em produção, isso seria criptografado
+          password: formData.password,
           role: 'user',
           createdAt: new Date().toISOString()
         };
@@ -74,16 +76,16 @@ export default function Login() {
         localStorage.setItem('currentUser', JSON.stringify(newUser));
 
         alert('Cadastro realizado com sucesso!');
-        window.location.href = '/profile';
+        setLocation('/profile'); // ✅ Use setLocation em vez de window.location.href
       }
     } catch (error) {
       console.error('Auth error:', error);
       alert('Erro durante a autenticação.');
-    } finally {
       setLoading(false);
     }
   };
 
+  // ... o restante do código permanece igual
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
