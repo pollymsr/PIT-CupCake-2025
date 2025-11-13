@@ -1,4 +1,4 @@
-// db.ts - CORRIGIDO
+// db.ts - CORRIGIDO COM IMAGENS VÁLIDAS
 import mongoose from 'mongoose';
 
 // 1. Conexão com o Banco de Dados
@@ -63,10 +63,10 @@ const OrderSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-// Models
-export const User = mongoose.models.User || mongoose.model('User', UserSchema);
-export const Cupcake = mongoose.models.Cupcake || mongoose.model('Cupcake', CupcakeSchema);
-export const Order = mongoose.models.Order || mongoose.model('Order', OrderSchema);
+// Models - CORREÇÃO: Usar type assertion para evitar erros TypeScript
+export const User = (mongoose.models.User as mongoose.Model<any>) || mongoose.model('User', UserSchema);
+export const Cupcake = (mongoose.models.Cupcake as mongoose.Model<any>) || mongoose.model('Cupcake', CupcakeSchema);
+export const Order = (mongoose.models.Order as mongoose.Model<any>) || mongoose.model('Order', OrderSchema);
 
 // 3. Funções de Acesso a Dados (CRUD)
 
@@ -138,7 +138,7 @@ export async function getCupcakeById(id: string): Promise<any> {
   return Cupcake.findById(id);
 }
 
-// Popular dados iniciais de cupcakes
+// Popular dados iniciais de cupcakes - CORRIGIDO COM IMAGENS VÁLIDAS
 export async function seedCupcakes() {
   await connectDb();
   
@@ -147,55 +147,75 @@ export async function seedCupcakes() {
       name: "Chocolate Belga",
       description: "Cupcake artesanal com chocolate belga premium",
       price: 12.90,
-      image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&h=300&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=300&fit=crop&q=80",
       category: "chocolate"
     },
     {
       name: "Morango Fresco",
       description: "Cupcake com recheio de morangos frescos",
       price: 11.90,
-      image: "https://unsplash.com/pt-br/fotografias/cupcake-com-cereja-rosa-por-cima-FAnSK-gVGZU",
+      image: "https://images.unsplash.com/photo-1551026941-874221147774?w=400&h=300&fit=crop&q=80",
       category: "frutas"
     },
     {
       name: "Baunilha Francesa",
       description: "Cupcake com essência de baunilha francesa",
       price: 10.90,
-      image: "https://unsplash.com/pt-br/fotografias/um-monte-de-cupcakes-com-cobertura-branca-e-polvilho-07Z9Sgv_0cM",
+      image: "https://images.unsplash.com/photo-1576618148400-9596041e2475?w=400&h=300&fit=crop&q=80",
       category: "clássico"
     },
     {
       name: "Red Velvet",
       description: "Cupcake red velvet com cream cheese",
       price: 13.90,
-      image: "https://unsplash.com/pt-br/fotografias/cupcake-branco-e-vermelho-com-cereja-branca-por-cima-MJPr6nOdppw",
+      image: "https://images.unsplash.com/photo-1588195538326-c2b1e6170f67?w=400&h=300&fit=crop&q=80",
       category: "especial"
     },
     {
       name: "Limão Siciliano",
       description: "Cupcake refrescante de limão siciliano",
       price: 11.50,
-      image: "https://unsplash.com/pt-br/fotografias/tampo-de-cupcake-com-creme-no-suporte-de-cupcake-amarelo-Ltv7a5m8i4c",
+      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop&q=80",
       category: "frutas"
     },
     {
       name: "Café Especial",
       description: "Cupcake com grãos de café especial",
       price: 12.50,
-      image: "https://unsplash.com/pt-br/fotografias/close-up-fotografia-de-cupcakes-zk-fclJdGas",
+      image: "https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=400&h=300&fit=crop&q=80",
       category: "especial"
+    },
+    {
+      name: "Nutella Cremoso",
+      description: "Cupcake com recheio cremoso de Nutella",
+      price: 14.90,
+      image: "https://images.unsplash.com/photo-1519861155730-0a1f0d5c4a8a?w=400&h=300&fit=crop&q=80",
+      category: "chocolate"
+    },
+    {
+      name: "Coco Tropical",
+      description: "Cupcake com coco fresco e leite condensado",
+      price: 12.90,
+      image: "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=400&h=300&fit=crop&q=80",
+      category: "tropical"
     }
   ];
 
   for (const cupcake of cupcakes) {
-    await Cupcake.findOneAndUpdate(
-      { name: cupcake.name },
-      cupcake,
-      { upsert: true, new: true }
-    );
+    try {
+      await Cupcake.findOneAndUpdate(
+        { name: cupcake.name },
+        cupcake,
+        { upsert: true, new: true }
+      );
+      console.log(`✅ Cupcake "${cupcake.name}" adicionado/atualizado`);
+    } catch (error) {
+      console.error(`❌ Erro ao adicionar cupcake "${cupcake.name}":`, error);
+    }
   }
   
-  console.log("✅ Cupcakes populados no banco!");
+  console.log("🎉 Todos os cupcakes foram populados no banco!");
+  return { message: "Cupcakes populados com sucesso!", count: cupcakes.length };
 }
 
 // Pedidos
