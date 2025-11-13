@@ -1,5 +1,5 @@
-// context/CartContext.tsx
-import { createContext, useContext, useState, ReactNode } from 'react';
+// context/CartContext.tsx - CORRIGIDO
+import React, { createContext, useContext, useState, ReactNode } from 'react'; // ← ADICIONE React aqui
 
 interface CartItem {
   id: string;

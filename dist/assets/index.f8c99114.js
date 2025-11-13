@@ -344,10 +344,10 @@ react_production_min.version = "18.3.1";
 {
   react.exports = react_production_min;
 }
-var React$1 = react.exports;
-var React$2 = /* @__PURE__ */ _mergeNamespaces({
+var React$2 = react.exports;
+var React$3 = /* @__PURE__ */ _mergeNamespaces({
   __proto__: null,
-  "default": React$1
+  "default": React$2
 }, [react.exports]);
 var reactDom = { exports: {} };
 var reactDom_production_min = {};
@@ -7579,11 +7579,11 @@ var useSyncExternalStoreShim_production = {};
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-var React = react.exports;
+var React$1 = react.exports;
 function is(x2, y2) {
   return x2 === y2 && (0 !== x2 || 1 / x2 === 1 / y2) || x2 !== x2 && y2 !== y2;
 }
-var objectIs = "function" === typeof Object.is ? Object.is : is, useState = React.useState, useEffect$1 = React.useEffect, useLayoutEffect$1 = React.useLayoutEffect, useDebugValue = React.useDebugValue;
+var objectIs = "function" === typeof Object.is ? Object.is : is, useState = React$1.useState, useEffect$1 = React$1.useEffect, useLayoutEffect$1 = React$1.useLayoutEffect, useDebugValue = React$1.useDebugValue;
 function useSyncExternalStore$2(subscribe, getSnapshot) {
   var value = getSnapshot(), _useState = useState({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
   useLayoutEffect$1(
@@ -7620,7 +7620,7 @@ function useSyncExternalStore$1(subscribe, getSnapshot) {
   return getSnapshot();
 }
 var shim = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
-useSyncExternalStoreShim_production.useSyncExternalStore = void 0 !== React.useSyncExternalStore ? React.useSyncExternalStore : shim;
+useSyncExternalStoreShim_production.useSyncExternalStore = void 0 !== React$1.useSyncExternalStore ? React$1.useSyncExternalStore : shim;
 {
   shim$1.exports = useSyncExternalStoreShim_production;
 }
@@ -7629,7 +7629,7 @@ const {
   useLayoutEffect,
   useRef,
   useInsertionEffect: useBuiltinInsertionEffect
-} = React$2;
+} = React$3;
 const canUseDOM = !!(typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined");
 const useIsomorphicLayoutEffect = canUseDOM ? useLayoutEffect : useEffect;
 const useInsertionEffect = useBuiltinInsertionEffect || useIsomorphicLayoutEffect;
@@ -7669,7 +7669,7 @@ const usePathname = ({ ssrPath } = {}) => useLocationProperty(
   ssrPath ? () => ssrPath : currentPathname
 );
 const navigate = (to, { replace = false } = {}) => history[replace ? eventReplaceState : eventPushState](null, "", to);
-const useLocation = (opts = {}) => [
+const useLocation$1 = (opts = {}) => [
   relativePath(opts.base, usePathname(opts)),
   useEvent((to, navOpts) => navigate(absolutePath(to, opts.base), navOpts))
 ];
@@ -7724,14 +7724,67 @@ const pathToRegexp = (pattern) => {
   return { keys, regexp: new RegExp("^" + result + "(?:\\/)?$", "i") };
 };
 const defaultRouter = {
-  hook: useLocation,
+  hook: useLocation$1,
   matcher: makeMatcher(),
   base: ""
 };
 const RouterCtx = react.exports.createContext(defaultRouter);
 const useRouter = () => react.exports.useContext(RouterCtx);
 const useLocationFromRouter = (router) => router.hook(router);
-react.exports.createContext({ params: {} });
+const useLocation = () => useLocationFromRouter(useRouter());
+const useRoute = (pattern) => {
+  const router = useRouter();
+  const [path] = useLocationFromRouter(router);
+  return router.matcher(pattern, path);
+};
+const ParamsCtx = react.exports.createContext({ params: {} });
+const Router = ({
+  hook,
+  matcher,
+  ssrPath,
+  base = "",
+  parent,
+  children
+}) => {
+  const updateRouter = (router, proto = parent || defaultRouter) => {
+    router.hook = hook || proto.hook;
+    router.matcher = matcher || proto.matcher;
+    router.ssrPath = ssrPath || proto.ssrPath;
+    router.ownBase = base;
+    router.parent = parent;
+    return router;
+  };
+  const [value] = react.exports.useState(
+    () => updateRouter({
+      get base() {
+        return (value.parent || defaultRouter).base + value.ownBase;
+      }
+    })
+  );
+  useInsertionEffect(() => {
+    updateRouter(value);
+  });
+  return react.exports.createElement(RouterCtx.Provider, {
+    value,
+    children
+  });
+};
+const ParamsWrapper = (params, children) => react.exports.createElement(ParamsCtx.Provider, {
+  value: { params },
+  children
+});
+const Route = ({ path, match, component, children }) => {
+  const useRouteMatch = useRoute(path);
+  const [matches, params] = match || useRouteMatch;
+  if (!matches)
+    return null;
+  if (component)
+    return ParamsWrapper(params, react.exports.createElement(component, { params }));
+  return ParamsWrapper(
+    params,
+    typeof children === "function" ? children(params) : children
+  );
+};
 const Link = react.exports.forwardRef((props, ref) => {
   const router = useRouter();
   const [, navigate2] = useLocationFromRouter(router);
@@ -7754,6 +7807,908 @@ const Link = react.exports.forwardRef((props, ref) => {
   const jsx = react.exports.isValidElement(children) ? children : react.exports.createElement("a", props);
   return react.exports.cloneElement(jsx, extraProps);
 });
+const TestAuthContext = react.exports.createContext(void 0);
+function TestAuthProvider({ children }) {
+  const [isTestUser, setIsTestUser] = react.exports.useState(false);
+  const loginAsTestUser = () => {
+    setIsTestUser(true);
+    console.log("\u2705 Logado como usu\xE1rio teste");
+    localStorage.setItem("test-user", "true");
+  };
+  const logoutTestUser = () => {
+    setIsTestUser(false);
+    console.log("\u{1F6AA} Logout do usu\xE1rio teste");
+    localStorage.removeItem("test-user");
+  };
+  return /* @__PURE__ */ React$2.createElement(TestAuthContext.Provider, {
+    value: { isTestUser, loginAsTestUser, logoutTestUser }
+  }, children);
+}
+function useTestAuth() {
+  const context = react.exports.useContext(TestAuthContext);
+  if (!context) {
+    throw new Error("useTestAuth must be used within a TestAuthProvider");
+  }
+  return context;
+}
+const CartContext = react.exports.createContext(void 0);
+function CartProvider({ children }) {
+  const [cart, setCart] = react.exports.useState([]);
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const addToCart = (item) => {
+    setCart((prev) => {
+      const existing = prev.find((i) => i.id === item.id);
+      if (existing) {
+        return prev.map(
+          (i) => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
+  };
+  const removeFromCart = (id2) => {
+    setCart((prev) => prev.filter((item) => item.id !== id2));
+  };
+  const clearCart = () => {
+    setCart([]);
+  };
+  const updateQuantity = (id2, quantity) => {
+    if (quantity <= 0) {
+      removeFromCart(id2);
+      return;
+    }
+    setCart((prev) => prev.map(
+      (item) => item.id === id2 ? { ...item, quantity } : item
+    ));
+  };
+  return /* @__PURE__ */ React$2.createElement(CartContext.Provider, {
+    value: {
+      cart,
+      total,
+      addToCart,
+      removeFromCart,
+      clearCart,
+      updateQuantity
+    }
+  }, children);
+}
+function useCart() {
+  const context = react.exports.useContext(CartContext);
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
+}
+const APP_TITLE = "Cupcake Pit";
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const toKebabCase = (string) => string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+const toCamelCase = (string) => string.replace(
+  /^([A-Z])|[\s-_]+(\w)/g,
+  (match, p1, p2) => p2 ? p2.toUpperCase() : p1.toLowerCase()
+);
+const toPascalCase = (string) => {
+  const camelCase = toCamelCase(string);
+  return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+};
+const mergeClasses = (...classes) => classes.filter((className, index, array) => {
+  return Boolean(className) && className.trim() !== "" && array.indexOf(className) === index;
+}).join(" ").trim();
+const hasA11yProp = (props) => {
+  for (const prop in props) {
+    if (prop.startsWith("aria-") || prop === "role" || prop === "title") {
+      return true;
+    }
+  }
+};
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+var defaultAttributes = {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: 24,
+  height: 24,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round"
+};
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const Icon = react.exports.forwardRef(
+  ({
+    color = "currentColor",
+    size = 24,
+    strokeWidth = 2,
+    absoluteStrokeWidth,
+    className = "",
+    children,
+    iconNode,
+    ...rest
+  }, ref) => react.exports.createElement(
+    "svg",
+    {
+      ref,
+      ...defaultAttributes,
+      width: size,
+      height: size,
+      stroke: color,
+      strokeWidth: absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size) : strokeWidth,
+      className: mergeClasses("lucide", className),
+      ...!children && !hasA11yProp(rest) && { "aria-hidden": "true" },
+      ...rest
+    },
+    [
+      ...iconNode.map(([tag, attrs]) => react.exports.createElement(tag, attrs)),
+      ...Array.isArray(children) ? children : [children]
+    ]
+  )
+);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const createLucideIcon = (iconName, iconNode) => {
+  const Component = react.exports.forwardRef(
+    ({ className, ...props }, ref) => react.exports.createElement(Icon, {
+      ref,
+      iconNode,
+      className: mergeClasses(
+        `lucide-${toKebabCase(toPascalCase(iconName))}`,
+        `lucide-${iconName}`,
+        className
+      ),
+      ...props
+    })
+  );
+  Component.displayName = toPascalCase(iconName);
+  return Component;
+};
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$j = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$j);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$i = [
+  [
+    "path",
+    {
+      d: "m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526",
+      key: "1yiouv"
+    }
+  ],
+  ["circle", { cx: "12", cy: "8", r: "6", key: "1vp47v" }]
+];
+const Award = createLucideIcon("award", __iconNode$i);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$h = [
+  ["path", { d: "M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8", key: "1w3rig" }],
+  ["path", { d: "M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1", key: "n2jgmb" }],
+  ["path", { d: "M2 21h20", key: "1nyx9w" }],
+  ["path", { d: "M7 8v3", key: "1qtyvj" }],
+  ["path", { d: "M12 8v3", key: "hwp4zt" }],
+  ["path", { d: "M17 8v3", key: "1i6e5u" }],
+  ["path", { d: "M7 4h.01", key: "1bh4kh" }],
+  ["path", { d: "M12 4h.01", key: "1ujb9j" }],
+  ["path", { d: "M17 4h.01", key: "1upcoc" }]
+];
+const Cake = createLucideIcon("cake", __iconNode$h);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$g = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
+const ChevronRight = createLucideIcon("chevron-right", __iconNode$g);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$f = [
+  ["path", { d: "M12 6v6l4 2", key: "mmk7yg" }],
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
+];
+const Clock = createLucideIcon("clock", __iconNode$f);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$e = [
+  [
+    "path",
+    {
+      d: "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
+      key: "ct8e1f"
+    }
+  ],
+  ["path", { d: "M14.084 14.158a3 3 0 0 1-4.242-4.242", key: "151rxh" }],
+  [
+    "path",
+    {
+      d: "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143",
+      key: "13bj9a"
+    }
+  ],
+  ["path", { d: "m2 2 20 20", key: "1ooewy" }]
+];
+const EyeOff = createLucideIcon("eye-off", __iconNode$e);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$d = [
+  [
+    "path",
+    {
+      d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0",
+      key: "1nclc0"
+    }
+  ],
+  ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
+];
+const Eye = createLucideIcon("eye", __iconNode$d);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$c = [
+  [
+    "path",
+    {
+      d: "M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5",
+      key: "mvr1a0"
+    }
+  ]
+];
+const Heart = createLucideIcon("heart", __iconNode$c);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$b = [
+  ["rect", { width: "18", height: "11", x: "3", y: "11", rx: "2", ry: "2", key: "1w4ew1" }],
+  ["path", { d: "M7 11V7a5 5 0 0 1 10 0v4", key: "fwvmzm" }]
+];
+const Lock = createLucideIcon("lock", __iconNode$b);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$a = [
+  ["path", { d: "m10 17 5-5-5-5", key: "1bsop3" }],
+  ["path", { d: "M15 12H3", key: "6jk70r" }],
+  ["path", { d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4", key: "u53s6r" }]
+];
+const LogIn = createLucideIcon("log-in", __iconNode$a);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$9 = [
+  ["path", { d: "m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7", key: "132q7q" }],
+  ["rect", { x: "2", y: "4", width: "20", height: "16", rx: "2", key: "izxlao" }]
+];
+const Mail = createLucideIcon("mail", __iconNode$9);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$8 = [
+  [
+    "path",
+    {
+      d: "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0",
+      key: "1r0f0z"
+    }
+  ],
+  ["circle", { cx: "12", cy: "10", r: "3", key: "ilqhr7" }]
+];
+const MapPin = createLucideIcon("map-pin", __iconNode$8);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$7 = [
+  [
+    "path",
+    {
+      d: "M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z",
+      key: "18887p"
+    }
+  ]
+];
+const MessageSquare = createLucideIcon("message-square", __iconNode$7);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$6 = [
+  [
+    "path",
+    {
+      d: "M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384",
+      key: "9njp5v"
+    }
+  ]
+];
+const Phone = createLucideIcon("phone", __iconNode$6);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$5 = [
+  [
+    "path",
+    {
+      d: "M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z",
+      key: "1ffxy3"
+    }
+  ],
+  ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
+];
+const Send = createLucideIcon("send", __iconNode$5);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$4 = [
+  ["circle", { cx: "8", cy: "21", r: "1", key: "jimo8o" }],
+  ["circle", { cx: "19", cy: "21", r: "1", key: "13723u" }],
+  [
+    "path",
+    {
+      d: "M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12",
+      key: "9zh506"
+    }
+  ]
+];
+const ShoppingCart = createLucideIcon("shopping-cart", __iconNode$4);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$3 = [
+  [
+    "path",
+    {
+      d: "M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z",
+      key: "r04s7s"
+    }
+  ]
+];
+const Star = createLucideIcon("star", __iconNode$3);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$2 = [
+  ["path", { d: "M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2", key: "wrbu53" }],
+  ["path", { d: "M15 18H9", key: "1lyqi6" }],
+  [
+    "path",
+    {
+      d: "M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14",
+      key: "lysw3i"
+    }
+  ],
+  ["circle", { cx: "17", cy: "18", r: "2", key: "332jqn" }],
+  ["circle", { cx: "7", cy: "18", r: "2", key: "19iecd" }]
+];
+const Truck = createLucideIcon("truck", __iconNode$2);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$1 = [
+  ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
+  ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }],
+  ["line", { x1: "19", x2: "19", y1: "8", y2: "14", key: "1bvyxn" }],
+  ["line", { x1: "22", x2: "16", y1: "11", y2: "11", key: "1shjgl" }]
+];
+const UserPlus = createLucideIcon("user-plus", __iconNode$1);
+/**
+ * @license lucide-react v0.553.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode = [
+  ["path", { d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2", key: "975kel" }],
+  ["circle", { cx: "12", cy: "7", r: "4", key: "17ys0d" }]
+];
+const User = createLucideIcon("user", __iconNode);
+function Home() {
+  useTestAuth();
+  const features = [
+    {
+      icon: /* @__PURE__ */ React$2.createElement(Award, {
+        className: "w-8 h-8 text-pink-600"
+      }),
+      title: "Qualidade Premium",
+      description: "Ingredientes frescos e selecionados, garantindo o sabor inigual\xE1vel em cada mordida."
+    },
+    {
+      icon: /* @__PURE__ */ React$2.createElement(Truck, {
+        className: "w-8 h-8 text-purple-600"
+      }),
+      title: "Entrega Expressa",
+      description: "Seu pedido rastreado e entregue com carinho e rapidez, direto para sua porta."
+    },
+    {
+      icon: /* @__PURE__ */ React$2.createElement(Cake, {
+        className: "w-8 h-8 text-yellow-600"
+      }),
+      title: "Receitas Exclusivas",
+      description: "Mais de 10 sabores artesanais, criados pela Chef Polly para momentos especiais."
+    }
+  ];
+  const popularFlavors = [
+    {
+      name: "Chocolate Belga",
+      price: "R$ 12,90",
+      color: "bg-amber-900",
+      image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
+    },
+    {
+      name: "Morango Fresco",
+      price: "R$ 11,90",
+      color: "bg-pink-500",
+      image: "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
+    },
+    {
+      name: "Baunilha Francesa",
+      price: "R$ 10,90",
+      color: "bg-yellow-100",
+      image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
+    },
+    {
+      name: "Red Velvet",
+      price: "R$ 13,90",
+      color: "bg-red-600",
+      image: "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
+    }
+  ];
+  const testimonials = [
+    { quote: "Os melhores cupcakes que j\xE1 comi! O Red Velvet \xE9 simplesmente divino.", author: "Ana C.", rating: 5 },
+    { quote: "Entrega super r\xE1pida e vieram perfeitos. Recomendo a todos!", author: "Bruno M.", rating: 5 },
+    { quote: "Qualidade impec\xE1vel e sabores muito criativos. Virei cliente fiel!", author: "Carla S.", rating: 5 }
+  ];
+  const StarRating = ({ rating }) => /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex justify-center space-x-1"
+  }, [...Array(5)].map((_, i) => /* @__PURE__ */ React$2.createElement(Star, {
+    key: i,
+    className: `w-4 h-4 ${i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`
+  })));
+  return /* @__PURE__ */ React$2.createElement("div", {
+    className: "min-h-screen bg-gray-50 font-sans"
+  }, /* @__PURE__ */ React$2.createElement("header", {
+    className: "sticky top-0 z-50 bg-white shadow-lg"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4 py-4 flex justify-between items-center"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex items-center space-x-3"
+  }, /* @__PURE__ */ React$2.createElement(Cake, {
+    className: "w-8 h-8 text-pink-600"
+  }), /* @__PURE__ */ React$2.createElement("h1", {
+    className: "text-2xl font-extrabold text-gray-800 tracking-tight"
+  }, APP_TITLE)), /* @__PURE__ */ React$2.createElement("nav", {
+    className: "flex items-center space-x-8"
+  }, /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/menu",
+    className: "text-gray-600 hover:text-pink-600 transition-colors font-medium"
+  }, "Card\xE1pio"), /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/sobre",
+    className: "text-gray-600 hover:text-pink-600 transition-colors font-medium"
+  }, "Sobre N\xF3s"), /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/contato",
+    className: "text-gray-600 hover:text-pink-600 transition-colors font-medium"
+  }, "Contato"), /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/checkout",
+    className: "flex items-center space-x-1 text-gray-600 hover:text-pink-600 transition-colors"
+  }, /* @__PURE__ */ React$2.createElement(ShoppingCart, {
+    className: "w-5 h-5"
+  }), /* @__PURE__ */ React$2.createElement("span", {
+    className: "hidden sm:inline"
+  }, "Carrinho (0)")), /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/login",
+    className: "bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center space-x-2 text-sm font-semibold"
+  }, /* @__PURE__ */ React$2.createElement(LogIn, {
+    className: "w-4 h-4"
+  }), /* @__PURE__ */ React$2.createElement("span", null, "Entrar"))))), /* @__PURE__ */ React$2.createElement("section", {
+    className: "relative bg-gradient-to-r from-pink-50 to-purple-100 py-20 md:py-32 overflow-hidden"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "grid md:grid-cols-2 gap-12 items-center"
+  }, /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-sm font-semibold text-pink-600 uppercase mb-2 tracking-widest"
+  }, "Onde a do\xE7ura encontra a arte"), /* @__PURE__ */ React$2.createElement("h1", {
+    className: "text-6xl font-extrabold text-gray-900 mb-6 leading-tight"
+  }, "O Sabor Inesquec\xEDvel dos ", /* @__PURE__ */ React$2.createElement("span", {
+    className: "text-pink-600"
+  }, "Cupcakes Artesanais")), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-xl text-gray-600 mb-10 leading-relaxed"
+  }, "Feitos com os melhores ingredientes e paix\xE3o em cada detalhe. Pe\xE7a agora e transforme seu dia!"), /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex space-x-4"
+  }, /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/menu",
+    className: "bg-pink-600 text-white px-8 py-4 rounded-full hover:bg-pink-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 flex items-center space-x-2 font-bold text-lg"
+  }, /* @__PURE__ */ React$2.createElement("span", null, "Ver Card\xE1pio Completo"), /* @__PURE__ */ React$2.createElement(ChevronRight, {
+    className: "w-5 h-5"
+  })), /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/sobre",
+    className: "border-2 border-pink-600 text-pink-600 px-8 py-4 rounded-full hover:bg-pink-600 hover:text-white transition-colors duration-300 font-semibold text-lg"
+  }, "Nossas Hist\xF3rias"))), /* @__PURE__ */ React$2.createElement("div", {
+    className: "relative hidden md:block"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "absolute inset-0 bg-pink-200 rounded-full opacity-50 blur-3xl transform scale-150"
+  }), /* @__PURE__ */ React$2.createElement("img", {
+    src: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&h=600&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1",
+    alt: "Cupcakes deliciosos",
+    className: "rounded-3xl shadow-2xl w-full h-auto object-cover transform rotate-1 scale-105 transition-transform duration-500 hover:rotate-0 hover:scale-100 relative z-10"
+  }))))), /* @__PURE__ */ React$2.createElement("section", {
+    className: "bg-white py-16 md:py-24"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4"
+  }, /* @__PURE__ */ React$2.createElement("h2", {
+    className: "text-4xl font-extrabold text-center text-gray-900 mb-16"
+  }, "Por que escolher a ", /* @__PURE__ */ React$2.createElement("span", {
+    className: "text-pink-600"
+  }, "Polly's"), "?"), /* @__PURE__ */ React$2.createElement("div", {
+    className: "grid md:grid-cols-3 gap-10"
+  }, features.map((feature, index) => /* @__PURE__ */ React$2.createElement("div", {
+    key: index,
+    className: "text-center p-8 bg-gray-50 rounded-xl shadow-lg border-t-4 border-pink-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex justify-center mb-4"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "p-3 bg-pink-100 rounded-full inline-block"
+  }, feature.icon)), /* @__PURE__ */ React$2.createElement("h3", {
+    className: "text-xl font-bold text-gray-800 mb-3"
+  }, feature.title), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-gray-600 leading-relaxed"
+  }, feature.description)))))), /* @__PURE__ */ React$2.createElement("section", {
+    className: "py-16 md:py-24 bg-gray-50"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4"
+  }, /* @__PURE__ */ React$2.createElement("h2", {
+    className: "text-4xl font-extrabold text-center text-gray-900 mb-16"
+  }, "Nossos ", /* @__PURE__ */ React$2.createElement("span", {
+    className: "text-pink-600"
+  }, "Sabores Populares")), /* @__PURE__ */ React$2.createElement("div", {
+    className: "grid sm:grid-cols-2 lg:grid-cols-4 gap-8"
+  }, popularFlavors.map((flavor, index) => /* @__PURE__ */ React$2.createElement("div", {
+    key: index,
+    className: "bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "relative h-48 overflow-hidden"
+  }, /* @__PURE__ */ React$2.createElement("img", {
+    src: flavor.image,
+    alt: `Cupcake de ${flavor.name}`,
+    className: "w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+  }), /* @__PURE__ */ React$2.createElement("div", {
+    className: "absolute top-2 right-2 bg-white rounded-full p-2 shadow-md hover:bg-pink-50 transition-colors cursor-pointer"
+  }, /* @__PURE__ */ React$2.createElement(Heart, {
+    className: "w-5 h-5 text-pink-500"
+  }))), /* @__PURE__ */ React$2.createElement("div", {
+    className: "p-5"
+  }, /* @__PURE__ */ React$2.createElement("h3", {
+    className: "text-xl font-bold text-gray-800 mb-1"
+  }, flavor.name), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-sm text-gray-500 mb-3"
+  }, "Cupcake artesanal"), /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex justify-between items-center"
+  }, /* @__PURE__ */ React$2.createElement("span", {
+    className: "text-2xl text-pink-600 font-extrabold"
+  }, flavor.price), /* @__PURE__ */ React$2.createElement("button", {
+    className: "bg-pink-600 text-white px-4 py-2 rounded-full hover:bg-pink-700 transition-colors flex items-center space-x-1 text-sm font-semibold shadow-lg"
+  }, /* @__PURE__ */ React$2.createElement(ShoppingCart, {
+    className: "w-4 h-4"
+  }), /* @__PURE__ */ React$2.createElement("span", null, "Comprar"))))))))), /* @__PURE__ */ React$2.createElement("section", {
+    className: "bg-white py-16 md:py-24"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4"
+  }, /* @__PURE__ */ React$2.createElement("h2", {
+    className: "text-4xl font-extrabold text-center text-gray-900 mb-16"
+  }, "O que dizem nossos ", /* @__PURE__ */ React$2.createElement("span", {
+    className: "text-pink-600"
+  }, "Clientes")), /* @__PURE__ */ React$2.createElement("div", {
+    className: "grid md:grid-cols-3 gap-8"
+  }, testimonials.map((testimonial, index) => /* @__PURE__ */ React$2.createElement("div", {
+    key: index,
+    className: "p-6 bg-pink-50 rounded-xl shadow-lg border border-pink-100"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex items-center mb-4"
+  }, /* @__PURE__ */ React$2.createElement(MessageSquare, {
+    className: "w-6 h-6 text-pink-600 mr-3"
+  }), /* @__PURE__ */ React$2.createElement(StarRating, {
+    rating: testimonial.rating
+  })), /* @__PURE__ */ React$2.createElement("blockquote", {
+    className: "text-gray-700 italic mb-4"
+  }, '"', testimonial.quote, '"'), /* @__PURE__ */ React$2.createElement("p", {
+    className: "font-semibold text-gray-800"
+  }, "- ", testimonial.author)))))), /* @__PURE__ */ React$2.createElement("section", {
+    className: "bg-pink-600 py-20"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4 text-center"
+  }, /* @__PURE__ */ React$2.createElement("h2", {
+    className: "text-4xl font-extrabold text-white mb-4"
+  }, "N\xE3o Resista \xE0 Tenta\xE7\xE3o!"), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-pink-100 text-xl mb-10 max-w-3xl mx-auto"
+  }, "Seja para uma festa, um presente ou um mimo pessoal, a Polly's Cupcakes tem o sabor perfeito para voc\xEA."), /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/menu",
+    className: "bg-white text-pink-600 px-10 py-4 rounded-full hover:bg-gray-100 transition-colors font-extrabold text-xl shadow-2xl transform hover:scale-105 inline-block"
+  }, "FAZER MEU PEDIDO AGORA"))), /* @__PURE__ */ React$2.createElement("footer", {
+    className: "bg-gray-900 text-white py-10"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4 text-center"
+  }, /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-gray-400 text-sm"
+  }, "\xA9 2025 Polly's Cupcakes. Todos os direitos reservados. | Feito com ", /* @__PURE__ */ React$2.createElement(Heart, {
+    className: "w-4 h-4 inline text-red-500"
+  }), " e paix\xE3o."))));
+}
+function Login() {
+  const { loginAsTestUser } = useTestAuth();
+  const [showPassword, setShowPassword] = react.exports.useState(false);
+  const [isLogin, setIsLogin] = react.exports.useState(true);
+  const [formData, setFormData] = react.exports.useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  });
+  const [loading, setLoading] = react.exports.useState(false);
+  const [, setLocation] = useLocation();
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const baseUrl = window.location.origin;
+      if (isLogin) {
+        const response = await fetch(`${baseUrl}/api/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          localStorage.setItem("currentUser", JSON.stringify(data.user));
+          alert("Login realizado com sucesso!");
+          setLocation("/profile");
+        } else {
+          alert(data.message || "Erro no login");
+        }
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          alert("As senhas n\xE3o coincidem!");
+          setLoading(false);
+          return;
+        }
+        const response = await fetch(`${baseUrl}/api/auth/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password
+          })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          localStorage.setItem("currentUser", JSON.stringify(data.user));
+          alert("Cadastro realizado com sucesso!");
+          setLocation("/profile");
+        } else {
+          alert(data.message || "Erro no cadastro");
+        }
+      }
+    } catch (error) {
+      console.error("Auth error:", error);
+      alert("Erro de conex\xE3o. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  return /* @__PURE__ */ React$2.createElement("div", {
+    className: "min-h-screen bg-gray-50 flex flex-col"
+  }, /* @__PURE__ */ React$2.createElement("header", {
+    className: "sticky top-0 z-50 bg-white shadow-lg"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4 py-4 flex justify-between items-center"
+  }, /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/",
+    className: "flex items-center space-x-3"
+  }, /* @__PURE__ */ React$2.createElement(Cake, {
+    className: "w-8 h-8 text-pink-600"
+  }), /* @__PURE__ */ React$2.createElement("h1", {
+    className: "text-2xl font-extrabold text-gray-800"
+  }, "Polly's Cupcakes")), /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/",
+    className: "text-gray-600 hover:text-pink-600 transition-colors"
+  }, "Voltar para Home"))), /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex-1 flex items-center justify-center py-12 px-4"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "max-w-md w-full bg-white rounded-2xl shadow-xl p-8"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "text-center mb-8"
+  }, isLogin ? /* @__PURE__ */ React$2.createElement(LogIn, {
+    className: "w-12 h-12 text-pink-600 mx-auto mb-4"
+  }) : /* @__PURE__ */ React$2.createElement(UserPlus, {
+    className: "w-12 h-12 text-pink-600 mx-auto mb-4"
+  }), /* @__PURE__ */ React$2.createElement("h2", {
+    className: "text-3xl font-bold text-gray-900"
+  }, isLogin ? "Entre na sua conta" : "Crie sua conta"), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-gray-600 mt-2"
+  }, isLogin ? "Acesse para gerenciar seus pedidos" : "Junte-se \xE0 nossa fam\xEDlia de amantes de cupcakes")), /* @__PURE__ */ React$2.createElement("form", {
+    onSubmit: handleAuth,
+    className: "space-y-6"
+  }, !isLogin && /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "Nome Completo"), /* @__PURE__ */ React$2.createElement("div", {
+    className: "relative"
+  }, /* @__PURE__ */ React$2.createElement(User, {
+    className: "w-5 h-5 text-gray-400 absolute left-3 top-3"
+  }), /* @__PURE__ */ React$2.createElement("input", {
+    type: "text",
+    name: "name",
+    value: formData.name,
+    onChange: handleChange,
+    className: "w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500",
+    placeholder: "Seu nome completo",
+    required: !isLogin
+  }))), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "E-mail"), /* @__PURE__ */ React$2.createElement("div", {
+    className: "relative"
+  }, /* @__PURE__ */ React$2.createElement(Mail, {
+    className: "w-5 h-5 text-gray-400 absolute left-3 top-3"
+  }), /* @__PURE__ */ React$2.createElement("input", {
+    type: "email",
+    name: "email",
+    value: formData.email,
+    onChange: handleChange,
+    className: "w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500",
+    placeholder: "seu@email.com",
+    required: true
+  }))), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "Senha"), /* @__PURE__ */ React$2.createElement("div", {
+    className: "relative"
+  }, /* @__PURE__ */ React$2.createElement(Lock, {
+    className: "w-5 h-5 text-gray-400 absolute left-3 top-3"
+  }), /* @__PURE__ */ React$2.createElement("input", {
+    type: showPassword ? "text" : "password",
+    name: "password",
+    value: formData.password,
+    onChange: handleChange,
+    className: "w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500",
+    placeholder: isLogin ? "Sua senha" : "Crie uma senha segura",
+    required: true,
+    minLength: 6
+  }), /* @__PURE__ */ React$2.createElement("button", {
+    type: "button",
+    onClick: () => setShowPassword(!showPassword),
+    className: "absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+  }, showPassword ? /* @__PURE__ */ React$2.createElement(EyeOff, {
+    className: "w-5 h-5"
+  }) : /* @__PURE__ */ React$2.createElement(Eye, {
+    className: "w-5 h-5"
+  })))), !isLogin && /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "Confirmar Senha"), /* @__PURE__ */ React$2.createElement("div", {
+    className: "relative"
+  }, /* @__PURE__ */ React$2.createElement(Lock, {
+    className: "w-5 h-5 text-gray-400 absolute left-3 top-3"
+  }), /* @__PURE__ */ React$2.createElement("input", {
+    type: showPassword ? "text" : "password",
+    name: "confirmPassword",
+    value: formData.confirmPassword,
+    onChange: handleChange,
+    className: "w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500",
+    placeholder: "Digite a senha novamente",
+    required: !isLogin
+  }))), /* @__PURE__ */ React$2.createElement("button", {
+    type: "submit",
+    disabled: loading,
+    className: "w-full bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition-colors font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+  }, loading ? "Carregando..." : isLogin ? "Entrar" : "Criar Conta")), /* @__PURE__ */ React$2.createElement("div", {
+    className: "mt-6 space-y-4 text-center"
+  }, /* @__PURE__ */ React$2.createElement("button", {
+    onClick: loginAsTestUser,
+    className: "w-full bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+  }, "Entrar como Usu\xE1rio Teste"), /* @__PURE__ */ React$2.createElement("div", {
+    className: "border-t pt-4"
+  }, /* @__PURE__ */ React$2.createElement("button", {
+    onClick: () => setIsLogin(!isLogin),
+    className: "text-pink-600 hover:text-pink-700 font-semibold"
+  }, isLogin ? "N\xE3o tem conta? Cadastre-se" : "J\xE1 tem conta? Fa\xE7a login")), isLogin && /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-gray-600 text-sm"
+  }, "Esqueceu sua senha?", " ", /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/contato",
+    className: "text-pink-600 hover:text-pink-700 font-semibold"
+  }, "Entre em contato"))), /* @__PURE__ */ React$2.createElement("div", {
+    className: "mt-6 p-3 bg-blue-50 rounded-lg border border-blue-200"
+  }, /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-blue-800 text-sm text-center"
+  }, /* @__PURE__ */ React$2.createElement("strong", null, "Modo:"), " ", isLogin ? "Login" : "Cadastro", " |", /* @__PURE__ */ React$2.createElement("strong", null, " API:"), " ", window.location.origin, "/api/auth/", isLogin ? "login" : "register")))));
+}
 const Register = () => {
   const [formData, setFormData] = react.exports.useState({
     name: "",
@@ -7801,30 +8756,30 @@ const Register = () => {
       setLoading(false);
     }
   };
-  return /* @__PURE__ */ React$1.createElement("div", {
+  return /* @__PURE__ */ React$2.createElement("div", {
     className: "min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8"
-  }, /* @__PURE__ */ React$1.createElement("div", {
+  }, /* @__PURE__ */ React$2.createElement("div", {
     className: "sm:mx-auto sm:w-full sm:max-w-md"
-  }, /* @__PURE__ */ React$1.createElement("h2", {
+  }, /* @__PURE__ */ React$2.createElement("h2", {
     className: "mt-6 text-center text-3xl font-extrabold text-gray-900"
-  }, "Criar sua conta"), /* @__PURE__ */ React$1.createElement("p", {
+  }, "Criar sua conta"), /* @__PURE__ */ React$2.createElement("p", {
     className: "mt-2 text-center text-sm text-gray-600"
-  }, "Ou", " ", /* @__PURE__ */ React$1.createElement(Link, {
+  }, "Ou", " ", /* @__PURE__ */ React$2.createElement(Link, {
     href: "/login",
     className: "font-medium text-pink-600 hover:text-pink-500"
-  }, "fa\xE7a login na sua conta existente"))), /* @__PURE__ */ React$1.createElement("div", {
+  }, "fa\xE7a login na sua conta existente"))), /* @__PURE__ */ React$2.createElement("div", {
     className: "mt-8 sm:mx-auto sm:w-full sm:max-w-md"
-  }, /* @__PURE__ */ React$1.createElement("div", {
+  }, /* @__PURE__ */ React$2.createElement("div", {
     className: "bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10"
-  }, /* @__PURE__ */ React$1.createElement("form", {
+  }, /* @__PURE__ */ React$2.createElement("form", {
     className: "space-y-6",
     onSubmit: handleSubmit
-  }, /* @__PURE__ */ React$1.createElement("div", null, /* @__PURE__ */ React$1.createElement("label", {
+  }, /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
     htmlFor: "name",
     className: "block text-sm font-medium text-gray-700"
-  }, "Nome completo"), /* @__PURE__ */ React$1.createElement("div", {
+  }, "Nome completo"), /* @__PURE__ */ React$2.createElement("div", {
     className: "mt-1"
-  }, /* @__PURE__ */ React$1.createElement("input", {
+  }, /* @__PURE__ */ React$2.createElement("input", {
     id: "name",
     name: "name",
     type: "text",
@@ -7833,12 +8788,12 @@ const Register = () => {
     onChange: handleChange,
     className: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm",
     placeholder: "Seu nome completo"
-  }))), /* @__PURE__ */ React$1.createElement("div", null, /* @__PURE__ */ React$1.createElement("label", {
+  }))), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
     htmlFor: "email",
     className: "block text-sm font-medium text-gray-700"
-  }, "E-mail"), /* @__PURE__ */ React$1.createElement("div", {
+  }, "E-mail"), /* @__PURE__ */ React$2.createElement("div", {
     className: "mt-1"
-  }, /* @__PURE__ */ React$1.createElement("input", {
+  }, /* @__PURE__ */ React$2.createElement("input", {
     id: "email",
     name: "email",
     type: "email",
@@ -7848,12 +8803,12 @@ const Register = () => {
     onChange: handleChange,
     className: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm",
     placeholder: "seu@email.com"
-  }))), /* @__PURE__ */ React$1.createElement("div", null, /* @__PURE__ */ React$1.createElement("label", {
+  }))), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
     htmlFor: "password",
     className: "block text-sm font-medium text-gray-700"
-  }, "Senha"), /* @__PURE__ */ React$1.createElement("div", {
+  }, "Senha"), /* @__PURE__ */ React$2.createElement("div", {
     className: "mt-1"
-  }, /* @__PURE__ */ React$1.createElement("input", {
+  }, /* @__PURE__ */ React$2.createElement("input", {
     id: "password",
     name: "password",
     type: "password",
@@ -7863,12 +8818,12 @@ const Register = () => {
     className: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm",
     placeholder: "M\xEDnimo 6 caracteres",
     minLength: 6
-  }))), /* @__PURE__ */ React$1.createElement("div", null, /* @__PURE__ */ React$1.createElement("label", {
+  }))), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
     htmlFor: "confirmPassword",
     className: "block text-sm font-medium text-gray-700"
-  }, "Confirmar senha"), /* @__PURE__ */ React$1.createElement("div", {
+  }, "Confirmar senha"), /* @__PURE__ */ React$2.createElement("div", {
     className: "mt-1"
-  }, /* @__PURE__ */ React$1.createElement("input", {
+  }, /* @__PURE__ */ React$2.createElement("input", {
     id: "confirmPassword",
     name: "confirmPassword",
     type: "password",
@@ -7877,31 +8832,602 @@ const Register = () => {
     onChange: handleChange,
     className: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm",
     placeholder: "Digite a senha novamente"
-  }))), /* @__PURE__ */ React$1.createElement("div", null, /* @__PURE__ */ React$1.createElement("button", {
+  }))), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("button", {
     type: "submit",
     disabled: loading,
     className: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50"
   }, loading ? "Cadastrando..." : "Cadastrar"))))));
 };
-const TestAuthContext = react.exports.createContext(void 0);
-function TestAuthProvider({ children }) {
-  const [isTestUser, setIsTestUser] = react.exports.useState(false);
-  const loginAsTestUser = () => {
-    setIsTestUser(true);
-    console.log("\u2705 Logado como usu\xE1rio teste");
-    localStorage.setItem("test-user", "true");
+const Button$1 = ({ children, variant, size, className, ...props }) => /* @__PURE__ */ React.createElement("button", {
+  className: `
+      inline-flex items-center justify-center rounded-md font-medium transition-colors
+      ${variant === "ghost" ? "bg-transparent hover:bg-gray-100" : "bg-pink-500 text-white hover:bg-pink-600"}
+      ${size === "icon" ? "p-2" : "px-4 py-2"}
+      ${size === "sm" ? "text-sm" : "text-base"}
+      disabled:opacity-50 disabled:cursor-not-allowed
+      ${className}
+    `,
+  ...props
+}, children);
+const Card$1 = ({ children, className, ...props }) => /* @__PURE__ */ React.createElement("div", {
+  className: `bg-white rounded-lg border border-gray-200 shadow-sm ${className}`,
+  ...props
+}, children);
+const trpc = {
+  cupcakes: {
+    list: {
+      useQuery: () => ({
+        data: [
+          {
+            _id: "1",
+            name: "Cupcake de Baunilha",
+            description: "Macio e leve",
+            price: 9.9,
+            imageUrl: "/images/vanilla.jpg",
+            available: true
+          },
+          {
+            _id: "2",
+            name: "Cupcake de Chocolate",
+            description: "Intenso e cremoso",
+            price: 11.5,
+            imageUrl: "/images/chocolate.jpg",
+            available: true
+          },
+          {
+            _id: "3",
+            name: "Cupcake Red Velvet",
+            description: "Cl\xE1ssico red velvet",
+            price: 12,
+            imageUrl: "/images/redvelvet.jpg",
+            available: true
+          },
+          {
+            _id: "4",
+            name: "Cupcake de Morango",
+            description: "Fresco e frutado",
+            price: 10.5,
+            imageUrl: "/images/strawberry.jpg",
+            available: true
+          },
+          {
+            _id: "5",
+            name: "Cupcake de Lim\xE3o",
+            description: "Refrescante e c\xEDtrico",
+            price: 9.5,
+            imageUrl: "/images/lemon.jpg",
+            available: true
+          },
+          {
+            _id: "6",
+            name: "Cupcake de Caf\xE9",
+            description: "Energ\xE9tico e arom\xE1tico",
+            price: 11,
+            imageUrl: "/images/coffee.jpg",
+            available: true
+          }
+        ],
+        isLoading: false
+      })
+    }
+  }
+};
+function Menu() {
+  const { data: cupcakes, isLoading } = trpc.cupcakes.list.useQuery();
+  const { addToCart } = useCart();
+  const [addedItems, setAddedItems] = react.exports.useState(/* @__PURE__ */ new Set());
+  const handleAddToCart = (cupcake) => {
+    const cartItem = {
+      id: cupcake._id,
+      name: cupcake.name,
+      price: cupcake.price,
+      image: cupcake.imageUrl,
+      quantity: 1
+    };
+    addToCart(cartItem);
+    setAddedItems((prev) => new Set(Array.from(prev).concat(cupcake._id)));
+    setTimeout(() => {
+      setAddedItems((prev) => {
+        const newSet = new Set(Array.from(prev));
+        newSet.delete(cupcake._id);
+        return newSet;
+      });
+    }, 1500);
   };
-  const logoutTestUser = () => {
-    setIsTestUser(false);
-    console.log("\u{1F6AA} Logout do usu\xE1rio teste");
-    localStorage.removeItem("test-user");
+  return /* @__PURE__ */ React.createElement("div", {
+    className: "min-h-screen bg-gradient-to-b from-pink-50 to-white"
+  }, /* @__PURE__ */ React.createElement("header", {
+    className: "sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-pink-100 shadow-sm"
+  }, /* @__PURE__ */ React.createElement("div", {
+    className: "container mx-auto px-4 py-4 flex items-center justify-between"
+  }, /* @__PURE__ */ React.createElement("div", {
+    className: "flex items-center gap-4"
+  }, /* @__PURE__ */ React.createElement(Link, {
+    href: "/"
+  }, /* @__PURE__ */ React.createElement(Button$1, {
+    variant: "ghost",
+    size: "icon"
+  }, /* @__PURE__ */ React.createElement(ArrowLeft, {
+    className: "h-5 w-5"
+  }))), /* @__PURE__ */ React.createElement("h1", {
+    className: "text-2xl font-bold"
+  }, "Card\xE1pio")), /* @__PURE__ */ React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /* @__PURE__ */ React.createElement(Link, {
+    href: "/profile"
+  }, /* @__PURE__ */ React.createElement(Button$1, {
+    variant: "ghost"
+  }, "Perfil")), /* @__PURE__ */ React.createElement(Link, {
+    href: "/checkout"
+  }, /* @__PURE__ */ React.createElement(Button$1, {
+    className: "bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700"
+  }, /* @__PURE__ */ React.createElement(ShoppingCart, {
+    className: "h-4 w-4 mr-2"
+  }), "Carrinho"))))), /* @__PURE__ */ React.createElement("main", {
+    className: "container mx-auto px-4 py-12"
+  }, /* @__PURE__ */ React.createElement("h2", {
+    className: "text-3xl font-bold mb-8"
+  }, "Nossos Cupcakes"), isLoading ? /* @__PURE__ */ React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+  }, [...Array(6)].map((_, i) => /* @__PURE__ */ React.createElement("div", {
+    key: i,
+    className: "bg-gray-200 rounded-lg h-80 animate-pulse"
+  }))) : /* @__PURE__ */ React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+  }, cupcakes?.map((cupcake) => /* @__PURE__ */ React.createElement(Card$1, {
+    key: cupcake._id,
+    className: "overflow-hidden hover:shadow-lg transition-shadow"
+  }, /* @__PURE__ */ React.createElement("div", {
+    className: "bg-gradient-to-br from-pink-200 to-purple-200 h-48 flex items-center justify-center text-4xl"
+  }, "\u{1F9C1}"), /* @__PURE__ */ React.createElement("div", {
+    className: "p-4"
+  }, /* @__PURE__ */ React.createElement("h3", {
+    className: "text-xl font-bold mb-2"
+  }, cupcake.name), /* @__PURE__ */ React.createElement("p", {
+    className: "text-gray-600 text-sm mb-4"
+  }, cupcake.description), /* @__PURE__ */ React.createElement("div", {
+    className: "flex items-center justify-between"
+  }, /* @__PURE__ */ React.createElement("span", {
+    className: "text-2xl font-bold text-pink-600"
+  }, "R$ ", cupcake.price.toFixed(2)), /* @__PURE__ */ React.createElement(Button$1, {
+    onClick: () => handleAddToCart(cupcake),
+    className: `${addedItems.has(cupcake._id) ? "bg-green-500 hover:bg-green-600" : "bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700"}`
+  }, /* @__PURE__ */ React.createElement(ShoppingCart, {
+    className: "h-4 w-4"
+  })))))))));
+}
+function useAuth() {
+  const [user, setUser] = react.exports.useState(null);
+  react.exports.useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+  const isAuthenticated = !!user;
+  return { user, isAuthenticated };
+}
+const Button = ({ children, variant, size, className, ...props }) => /* @__PURE__ */ React.createElement("button", {
+  className: `
+      inline-flex items-center justify-center rounded-md font-medium transition-colors
+      ${variant === "ghost" ? "bg-transparent hover:bg-gray-100" : "bg-pink-500 text-white hover:bg-pink-600"}
+      ${size === "icon" ? "p-2" : "px-4 py-2"}
+      ${size === "sm" ? "text-sm" : "text-base"}
+      disabled:opacity-50 disabled:cursor-not-allowed
+      ${className}
+    `,
+  ...props
+}, children);
+const Card = ({ children, className, ...props }) => /* @__PURE__ */ React.createElement("div", {
+  className: `bg-white rounded-lg border border-gray-200 shadow-sm p-6 ${className}`,
+  ...props
+}, children);
+function Checkout() {
+  const { cart, total, clearCart } = useCart();
+  const { user } = useAuth();
+  const [formData, setFormData] = react.exports.useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    address: "",
+    city: "",
+    zip: ""
+  });
+  const [paymentMethod, setPaymentMethod] = react.exports.useState("credit");
+  const [errors, setErrors] = react.exports.useState({});
+  const [isSubmitting, setIsSubmitting] = react.exports.useState(false);
+  const createOrderMutation = {
+    mutateAsync: async (data) => {
+      console.log("Dados do pedido:", data);
+      await new Promise((resolve) => setTimeout(resolve, 2e3));
+      return { orderId: Math.random().toString(36).substr(2, 9) };
+    },
+    isLoading: false
   };
-  return /* @__PURE__ */ React$1.createElement(TestAuthContext.Provider, {
-    value: { isTestUser, loginAsTestUser, logoutTestUser }
-  }, children);
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.name.trim())
+      newErrors.name = "Nome \xE9 obrigat\xF3rio";
+    if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email v\xE1lido \xE9 obrigat\xF3rio";
+    }
+    if (!formData.address.trim())
+      newErrors.address = "Endere\xE7o \xE9 obrigat\xF3rio";
+    if (!formData.city.trim())
+      newErrors.city = "Cidade \xE9 obrigat\xF3ria";
+    if (!formData.zip.trim())
+      newErrors.zip = "CEP \xE9 obrigat\xF3rio";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      alert("Preencha todos os campos obrigat\xF3rios");
+      return;
+    }
+    if (cart.length === 0) {
+      alert("Adicione itens ao carrinho antes de finalizar o pedido");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const result = await createOrderMutation.mutateAsync({
+        total,
+        paymentMethod,
+        customerName: formData.name,
+        customerEmail: formData.email,
+        customerAddress: formData.address,
+        customerCity: formData.city,
+        customerZip: formData.zip,
+        items: cart.map((item) => ({
+          name: item.name,
+          id: item.id,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      });
+      alert(`Pedido #${result.orderId} criado com sucesso!`);
+      clearCart();
+      window.location.href = "/orders";
+    } catch (error) {
+      alert(`Erro ao criar pedido: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  if (cart.length === 0) {
+    return /* @__PURE__ */ React.createElement("div", {
+      className: "min-h-screen bg-gradient-to-b from-pink-50 to-white"
+    }, /* @__PURE__ */ React.createElement("header", {
+      className: "sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-pink-100 shadow-sm"
+    }, /* @__PURE__ */ React.createElement("div", {
+      className: "container mx-auto px-4 py-4 flex items-center"
+    }, /* @__PURE__ */ React.createElement(Link, {
+      href: "/menu"
+    }, /* @__PURE__ */ React.createElement(Button, {
+      variant: "ghost",
+      size: "icon"
+    }, /* @__PURE__ */ React.createElement(ArrowLeft, {
+      className: "h-5 w-5"
+    }))), /* @__PURE__ */ React.createElement("h1", {
+      className: "text-2xl font-bold"
+    }, "Checkout"))), /* @__PURE__ */ React.createElement("main", {
+      className: "container mx-auto px-4 py-12 text-center"
+    }, /* @__PURE__ */ React.createElement("p", {
+      className: "text-xl text-gray-600 mb-6"
+    }, "Seu carrinho est\xE1 vazio"), /* @__PURE__ */ React.createElement(Link, {
+      href: "/menu"
+    }, /* @__PURE__ */ React.createElement(Button, {
+      className: "bg-gradient-to-r from-pink-500 to-pink-600"
+    }, "Voltar ao Card\xE1pio"))));
+  }
+  return /* @__PURE__ */ React.createElement("div", {
+    className: "min-h-screen bg-gradient-to-b from-pink-50 to-white"
+  }, /* @__PURE__ */ React.createElement("header", {
+    className: "sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-pink-100 shadow-sm"
+  }, /* @__PURE__ */ React.createElement("div", {
+    className: "container mx-auto px-4 py-4 flex items-center"
+  }, /* @__PURE__ */ React.createElement(Link, {
+    href: "/menu"
+  }, /* @__PURE__ */ React.createElement(Button, {
+    variant: "ghost",
+    size: "icon"
+  }, /* @__PURE__ */ React.createElement(ArrowLeft, {
+    className: "h-5 w-5"
+  }))), /* @__PURE__ */ React.createElement("h1", {
+    className: "text-2xl font-bold"
+  }, "Checkout"))), /* @__PURE__ */ React.createElement("main", {
+    className: "container mx-auto px-4 py-12 max-w-2xl"
+  }, /* @__PURE__ */ React.createElement(Card, {
+    className: "mb-8 p-6"
+  }, /* @__PURE__ */ React.createElement("h2", {
+    className: "text-2xl font-bold mb-4"
+  }, "Resumo do Pedido"), /* @__PURE__ */ React.createElement("div", {
+    className: "space-y-3 mb-4"
+  }, cart.map((item) => /* @__PURE__ */ React.createElement("div", {
+    key: item.id,
+    className: "flex justify-between"
+  }, /* @__PURE__ */ React.createElement("span", null, item.quantity, "x ", item.name), /* @__PURE__ */ React.createElement("span", null, "R$ ", (item.price * item.quantity).toFixed(2))))), /* @__PURE__ */ React.createElement("div", {
+    className: "border-t pt-4 flex justify-between font-bold text-lg"
+  }, /* @__PURE__ */ React.createElement("span", null, "Total:"), /* @__PURE__ */ React.createElement("span", {
+    className: "text-pink-600"
+  }, "R$ ", total.toFixed(2)))), /* @__PURE__ */ React.createElement(Card, {
+    className: "mb-8 p-6"
+  }, /* @__PURE__ */ React.createElement("h2", {
+    className: "text-2xl font-bold mb-4"
+  }, "Informa\xE7\xF5es de Entrega"), /* @__PURE__ */ React.createElement("form", {
+    onSubmit: handleSubmit,
+    className: "space-y-4"
+  }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", {
+    className: "block text-sm font-medium mb-1"
+  }, "Nome Completo *"), /* @__PURE__ */ React.createElement("input", {
+    type: "text",
+    value: formData.name,
+    onChange: (e) => setFormData({ ...formData, name: e.target.value }),
+    className: `w-full px-4 py-2 border rounded-lg ${errors.name ? "border-red-500" : "border-gray-300"}`,
+    placeholder: "Seu nome completo"
+  }), errors.name && /* @__PURE__ */ React.createElement("p", {
+    className: "text-red-500 text-sm mt-1"
+  }, errors.name)), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", {
+    className: "block text-sm font-medium mb-1"
+  }, "Email *"), /* @__PURE__ */ React.createElement("input", {
+    type: "email",
+    value: formData.email,
+    onChange: (e) => setFormData({ ...formData, email: e.target.value }),
+    className: `w-full px-4 py-2 border rounded-lg ${errors.email ? "border-red-500" : "border-gray-300"}`,
+    placeholder: "seu@email.com"
+  }), errors.email && /* @__PURE__ */ React.createElement("p", {
+    className: "text-red-500 text-sm mt-1"
+  }, errors.email)), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", {
+    className: "block text-sm font-medium mb-1"
+  }, "Endere\xE7o *"), /* @__PURE__ */ React.createElement("input", {
+    type: "text",
+    value: formData.address,
+    onChange: (e) => setFormData({ ...formData, address: e.target.value }),
+    className: `w-full px-4 py-2 border rounded-lg ${errors.address ? "border-red-500" : "border-gray-300"}`,
+    placeholder: "Rua, n\xFAmero, bairro"
+  }), errors.address && /* @__PURE__ */ React.createElement("p", {
+    className: "text-red-500 text-sm mt-1"
+  }, errors.address)), /* @__PURE__ */ React.createElement("div", {
+    className: "grid grid-cols-2 gap-4"
+  }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", {
+    className: "block text-sm font-medium mb-1"
+  }, "Cidade *"), /* @__PURE__ */ React.createElement("input", {
+    type: "text",
+    value: formData.city,
+    onChange: (e) => setFormData({ ...formData, city: e.target.value }),
+    className: `w-full px-4 py-2 border rounded-lg ${errors.city ? "border-red-500" : "border-gray-300"}`,
+    placeholder: "Sua cidade"
+  }), errors.city && /* @__PURE__ */ React.createElement("p", {
+    className: "text-red-500 text-sm mt-1"
+  }, errors.city)), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", {
+    className: "block text-sm font-medium mb-1"
+  }, "CEP *"), /* @__PURE__ */ React.createElement("input", {
+    type: "text",
+    value: formData.zip,
+    onChange: (e) => setFormData({ ...formData, zip: e.target.value }),
+    className: `w-full px-4 py-2 border rounded-lg ${errors.zip ? "border-red-500" : "border-gray-300"}`,
+    placeholder: "00000-000"
+  }), errors.zip && /* @__PURE__ */ React.createElement("p", {
+    className: "text-red-500 text-sm mt-1"
+  }, errors.zip))), /* @__PURE__ */ React.createElement("div", {
+    className: "mt-6"
+  }, /* @__PURE__ */ React.createElement("h3", {
+    className: "text-lg font-bold mb-3"
+  }, "M\xE9todo de Pagamento"), /* @__PURE__ */ React.createElement("div", {
+    className: "grid grid-cols-2 gap-4"
+  }, /* @__PURE__ */ React.createElement("button", {
+    type: "button",
+    onClick: () => setPaymentMethod("credit"),
+    className: `p-4 border-2 rounded-lg transition-colors ${paymentMethod === "credit" ? "border-pink-500 bg-pink-50 text-pink-700" : "border-gray-300 hover:border-gray-400"}`
+  }, "\u{1F4B3} Cart\xE3o de Cr\xE9dito"), /* @__PURE__ */ React.createElement("button", {
+    type: "button",
+    onClick: () => setPaymentMethod("pix"),
+    className: `p-4 border-2 rounded-lg transition-colors ${paymentMethod === "pix" ? "border-pink-500 bg-pink-50 text-pink-700" : "border-gray-300 hover:border-gray-400"}`
+  }, "\u{1F4F1} PIX"))), /* @__PURE__ */ React.createElement(Button, {
+    type: "submit",
+    disabled: isSubmitting,
+    className: "w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white py-3 text-lg font-bold mt-6"
+  }, isSubmitting ? "Processando..." : "Finalizar Pedido")))));
+}
+function Contato() {
+  const [formData, setFormData] = react.exports.useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: ""
+  });
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Form submitted:", formData);
+    alert("Mensagem enviada com sucesso! Entraremos em contato em breve.");
+    setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+  };
+  return /* @__PURE__ */ React$2.createElement("div", {
+    className: "min-h-screen bg-gray-50"
+  }, /* @__PURE__ */ React$2.createElement("header", {
+    className: "sticky top-0 z-50 bg-white shadow-lg"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4 py-4 flex justify-between items-center"
+  }, /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/",
+    className: "flex items-center space-x-3"
+  }, /* @__PURE__ */ React$2.createElement(Cake, {
+    className: "w-8 h-8 text-pink-600"
+  }), /* @__PURE__ */ React$2.createElement("h1", {
+    className: "text-2xl font-extrabold text-gray-800"
+  }, "Polly's Cupcakes")), /* @__PURE__ */ React$2.createElement("nav", {
+    className: "flex items-center space-x-6"
+  }, /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/",
+    className: "text-gray-600 hover:text-pink-600 transition-colors"
+  }, "Home"), /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/menu",
+    className: "text-gray-600 hover:text-pink-600 transition-colors"
+  }, "Card\xE1pio")))), /* @__PURE__ */ React$2.createElement("section", {
+    className: "bg-gradient-to-r from-pink-50 to-purple-100 py-20"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4 text-center"
+  }, /* @__PURE__ */ React$2.createElement("h1", {
+    className: "text-5xl font-bold text-gray-900 mb-6"
+  }, "Entre em Contato"), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-xl text-gray-600 max-w-3xl mx-auto"
+  }, "Estamos aqui para tornar seus momentos mais doces. Fale conosco!"))), /* @__PURE__ */ React$2.createElement("section", {
+    className: "py-16"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "container mx-auto px-4"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "bg-white rounded-2xl shadow-xl p-8"
+  }, /* @__PURE__ */ React$2.createElement("h2", {
+    className: "text-3xl font-bold text-gray-900 mb-6"
+  }, "Envie sua Mensagem"), /* @__PURE__ */ React$2.createElement("form", {
+    onSubmit: handleSubmit,
+    className: "space-y-6"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "grid md:grid-cols-2 gap-4"
+  }, /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "Nome Completo *"), /* @__PURE__ */ React$2.createElement("input", {
+    type: "text",
+    name: "name",
+    value: formData.name,
+    onChange: handleChange,
+    className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500",
+    required: true
+  })), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "Telefone"), /* @__PURE__ */ React$2.createElement("input", {
+    type: "tel",
+    name: "phone",
+    value: formData.phone,
+    onChange: handleChange,
+    className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+  }))), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "E-mail *"), /* @__PURE__ */ React$2.createElement("input", {
+    type: "email",
+    name: "email",
+    value: formData.email,
+    onChange: handleChange,
+    className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500",
+    required: true
+  })), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "Assunto *"), /* @__PURE__ */ React$2.createElement("select", {
+    name: "subject",
+    value: formData.subject,
+    onChange: handleChange,
+    className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500",
+    required: true
+  }, /* @__PURE__ */ React$2.createElement("option", {
+    value: ""
+  }, "Selecione um assunto"), /* @__PURE__ */ React$2.createElement("option", {
+    value: "pedido"
+  }, "Fazer Pedido"), /* @__PURE__ */ React$2.createElement("option", {
+    value: "duvida"
+  }, "D\xFAvida"), /* @__PURE__ */ React$2.createElement("option", {
+    value: "sugestao"
+  }, "Sugest\xE3o"), /* @__PURE__ */ React$2.createElement("option", {
+    value: "reclamacao"
+  }, "Reclama\xE7\xE3o"), /* @__PURE__ */ React$2.createElement("option", {
+    value: "outro"
+  }, "Outro"))), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("label", {
+    className: "block text-sm font-medium text-gray-700 mb-2"
+  }, "Mensagem *"), /* @__PURE__ */ React$2.createElement("textarea", {
+    name: "message",
+    value: formData.message,
+    onChange: handleChange,
+    rows: 5,
+    className: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500",
+    required: true
+  })), /* @__PURE__ */ React$2.createElement("button", {
+    type: "submit",
+    className: "w-full bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition-colors font-semibold flex items-center justify-center space-x-2"
+  }, /* @__PURE__ */ React$2.createElement(Send, {
+    className: "w-5 h-5"
+  }), /* @__PURE__ */ React$2.createElement("span", null, "Enviar Mensagem")))), /* @__PURE__ */ React$2.createElement("div", {
+    className: "space-y-8"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "bg-white rounded-2xl shadow-xl p-8"
+  }, /* @__PURE__ */ React$2.createElement("h3", {
+    className: "text-2xl font-bold text-gray-900 mb-6"
+  }, "Informa\xE7\xF5es de Contato"), /* @__PURE__ */ React$2.createElement("div", {
+    className: "space-y-4"
+  }, /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex items-center space-x-4"
+  }, /* @__PURE__ */ React$2.createElement(Phone, {
+    className: "w-6 h-6 text-pink-600"
+  }), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("p", {
+    className: "font-semibold"
+  }, "Telefone"), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-gray-600"
+  }, "(11) 9999-9999"))), /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex items-center space-x-4"
+  }, /* @__PURE__ */ React$2.createElement(Mail, {
+    className: "w-6 h-6 text-pink-600"
+  }), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("p", {
+    className: "font-semibold"
+  }, "E-mail"), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-gray-600"
+  }, "contato@pollyscupcakes.com"))), /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex items-start space-x-4"
+  }, /* @__PURE__ */ React$2.createElement(MapPin, {
+    className: "w-6 h-6 text-pink-600 mt-1"
+  }), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("p", {
+    className: "font-semibold"
+  }, "Endere\xE7o"), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-gray-600"
+  }, "Rua dos Cupcakes, 123", /* @__PURE__ */ React$2.createElement("br", null), "Jardim Doce - S\xE3o Paulo, SP", /* @__PURE__ */ React$2.createElement("br", null), "01234-567"))), /* @__PURE__ */ React$2.createElement("div", {
+    className: "flex items-start space-x-4"
+  }, /* @__PURE__ */ React$2.createElement(Clock, {
+    className: "w-6 h-6 text-pink-600 mt-1"
+  }), /* @__PURE__ */ React$2.createElement("div", null, /* @__PURE__ */ React$2.createElement("p", {
+    className: "font-semibold"
+  }, "Hor\xE1rio de Funcionamento"), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-gray-600"
+  }, "Segunda a S\xE1bado: 8h \xE0s 20h", /* @__PURE__ */ React$2.createElement("br", null), "Domingo: 9h \xE0s 18h"))))), /* @__PURE__ */ React$2.createElement("div", {
+    className: "bg-pink-50 rounded-2xl p-6"
+  }, /* @__PURE__ */ React$2.createElement("h4", {
+    className: "text-lg font-bold text-gray-900 mb-3"
+  }, "Pedidos Especiais"), /* @__PURE__ */ React$2.createElement("p", {
+    className: "text-gray-700 mb-4"
+  }, "Para festas, eventos corporativos ou pedidos personalizados, entre em contato com pelo menos 48h de anteced\xEAncia."), /* @__PURE__ */ React$2.createElement(Link, {
+    href: "/menu",
+    className: "bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition-colors font-semibold inline-block"
+  }, "Ver Card\xE1pio")))))));
+}
+function App() {
+  return /* @__PURE__ */ React$2.createElement(TestAuthProvider, null, /* @__PURE__ */ React$2.createElement(CartProvider, null, /* @__PURE__ */ React$2.createElement(Router, null, /* @__PURE__ */ React$2.createElement(Route, {
+    path: "/",
+    component: Home
+  }), " ", /* @__PURE__ */ React$2.createElement(Route, {
+    path: "/login",
+    component: Login
+  }), /* @__PURE__ */ React$2.createElement(Route, {
+    path: "/register",
+    component: Register
+  }), /* @__PURE__ */ React$2.createElement(Route, {
+    path: "/menu",
+    component: Menu
+  }), /* @__PURE__ */ React$2.createElement(Route, {
+    path: "/checkout",
+    component: Checkout
+  }), /* @__PURE__ */ React$2.createElement(Route, {
+    path: "/contato",
+    component: Contato
+  }))));
 }
 const container = document.getElementById("root");
 const root = createRoot(container);
 root.render(
-  /* @__PURE__ */ React$1.createElement(React$1.StrictMode, null, /* @__PURE__ */ React$1.createElement(TestAuthProvider, null, /* @__PURE__ */ React$1.createElement(Register, null)))
+  /* @__PURE__ */ React$2.createElement(React$2.StrictMode, null, /* @__PURE__ */ React$2.createElement(TestAuthProvider, null, /* @__PURE__ */ React$2.createElement(App, null)))
 );
