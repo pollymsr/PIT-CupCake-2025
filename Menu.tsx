@@ -129,7 +129,7 @@ export default function Menu() {
             <h1 className="text-2xl font-bold">Cardápio</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/profile">
+            <Link href="/perfil">
               <Button variant="ghost">Perfil</Button>
             </Link>
             <Link href="/checkout">
