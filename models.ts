@@ -1,3 +1,4 @@
+// models.ts - ATUALIZADO
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 // 1. Interfaces para os documentos do MongoDB
@@ -5,6 +6,7 @@ export interface IUser extends Document {
   openId: string;
   name?: string | null;
   email?: string | null;
+  password?: string; // ADICIONADO
   loginMethod?: string | null;
   lastSignedIn: Date;
   role: 'user' | 'admin';
@@ -38,10 +40,13 @@ export interface IOrderItem extends Document {
 const UserSchema: Schema = new Schema({
   openId: { type: String, required: true, unique: true },
   name: { type: String, default: null },
-  email: { type: String, default: null },
+  email: { type: String, default: null, unique: true, sparse: true }, // MODIFICADO
+  password: { type: String }, // ADICIONADO
   loginMethod: { type: String, default: null },
   lastSignedIn: { type: Date, default: Date.now },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
+}, {
+  timestamps: true // ADICIONADO para createdAt e updatedAt automáticos
 });
 
 const CupcakeSchema: Schema = new Schema({
@@ -71,10 +76,10 @@ const OrderItemSchema: Schema = new Schema({
 });
 
 // 3. Modelos do Mongoose
-export const User = mongoose.model<IUser>('User', UserSchema);
-export const Cupcake = mongoose.model<ICupcake>('Cupcake', CupcakeSchema);
-export const Order = mongoose.model<IOrder>('Order', OrderSchema);
-export const OrderItem = mongoose.model<IOrderItem>('OrderItem', OrderItemSchema);
+export const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+export const Cupcake = mongoose.models.Cupcake || mongoose.model<ICupcake>('Cupcake', CupcakeSchema);
+export const Order = mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+export const OrderItem = mongoose.models.OrderItem || mongoose.model<IOrderItem>('OrderItem', OrderItemSchema);
 
 // 4. Tipos de Inserção
 export type InsertUser = Omit<IUser, '_id' | 'lastSignedIn' | 'role'> & Partial<Pick<IUser, 'lastSignedIn' | 'role'>>;

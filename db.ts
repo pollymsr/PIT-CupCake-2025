@@ -1,7 +1,6 @@
+// db.ts - ATUALIZADO
 import mongoose from 'mongoose';
 import { User, IUser, Cupcake, ICupcake, Order, IOrder, OrderItem, IOrderItem } from './models';
-import { ENV } from './env';
-
 
 // 1. Conexão com o Banco de Dados
 export async function connectDb() {
@@ -31,11 +30,6 @@ export async function upsertUser(user: Partial<IUser> & { openId: string }): Pro
   await connectDb();
   const { openId, ...updateFields } = user;
 
-  // Define a role if it's the owner
-  if (openId === ENV.ownerOpenId) {
-    updateFields.role = 'admin';
-  }
-
   const result = await User.findOneAndUpdate(
     { openId },
     {
@@ -62,6 +56,33 @@ export async function getUserByOpenId(openId: string): Promise<IUser | null> {
   return User.findOne({ openId });
 }
 
+// NOVA FUNÇÃO: Buscar usuário por email
+export async function getUserByEmail(email: string): Promise<IUser | null> {
+  await connectDb();
+  return User.findOne({ email: email.toLowerCase() });
+}
+
+// NOVA FUNÇÃO: Criar usuário com senha
+export async function createUserWithPassword(userData: {
+  name: string;
+  email: string;
+  password: string;
+}): Promise<IUser> {
+  await connectDb();
+  
+  const user = new User({
+    openId: userData.email, // Usando email como openId
+    name: userData.name,
+    email: userData.email,
+    password: userData.password,
+    loginMethod: 'email',
+    role: 'user'
+  });
+
+  await user.save();
+  return user;
+}
+
 // Cupcakes
 export async function getAllCupcakes(): Promise<ICupcake[]> {
   await connectDb();
@@ -79,7 +100,7 @@ export async function createOrder(orderData: { userId: string, userName: string,
   await connectDb();
   const order = new Order({
     ...orderData,
-    userId: new mongoose.Types.ObjectId(orderData.userId), // Convert string ID to ObjectId
+    userId: new mongoose.Types.ObjectId(orderData.userId),
   });
   await order.save();
   return order;
@@ -96,6 +117,3 @@ export async function getUserOrders(userId: string): Promise<IOrder[]> {
   if (!mongoose.Types.ObjectId.isValid(userId)) return [];
   return Order.find({ userId: new mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 });
 }
-
-// Funções auxiliares (se necessário, podem ser adicionadas aqui)
-// ...
