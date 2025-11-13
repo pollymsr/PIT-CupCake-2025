@@ -1,6 +1,5 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'  // ← Este import deve funcionar agora
 import App from './App'
 import { TestAuthProvider } from './context/TestAuthContext'
 
