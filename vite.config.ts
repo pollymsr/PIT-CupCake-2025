@@ -5,7 +5,7 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: 'dist/client',
+    outDir: 'dist',
     sourcemap: false,
     rollupOptions: {
       input: {

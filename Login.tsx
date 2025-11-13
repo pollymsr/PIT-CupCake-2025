@@ -1,4 +1,4 @@
-// Login.tsx - COM BACKEND REAL
+// Login.tsx - VERSÃO COMPLETA COM APIs SERVERLESS
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Cake, LogIn, Mail, Lock, Eye, EyeOff, User, UserPlus } from 'lucide-react';
@@ -24,15 +24,17 @@ export default function Login() {
     });
   };
 
-  // Função para autenticação com backend real
+  // Função para autenticação com APIs serverless
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const baseUrl = window.location.origin; // Usa a mesma origem do frontend
+
       if (isLogin) {
-        // Login com backend
-        const response = await fetch('/api/auth/login', {
+        // Login com API serverless
+        const response = await fetch(`${baseUrl}/api/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -53,14 +55,14 @@ export default function Login() {
           alert(data.message || 'Erro no login');
         }
       } else {
-        // Cadastro com backend
+        // Cadastro com API serverless
         if (formData.password !== formData.confirmPassword) {
           alert('As senhas não coincidem!');
           setLoading(false);
           return;
         }
 
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch(`${baseUrl}/api/auth/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -90,7 +92,6 @@ export default function Login() {
     }
   };
 
-  // ... (restante do JSX permanece igual)
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
@@ -242,6 +243,14 @@ export default function Login() {
                 </Link>
               </p>
             )}
+          </div>
+
+          {/* Debug info - pode remover em produção */}
+          <div className="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-blue-800 text-sm text-center">
+              <strong>Modo:</strong> {isLogin ? 'Login' : 'Cadastro'} | 
+              <strong> API:</strong> {window.location.origin}/api/auth/{isLogin ? 'login' : 'register'}
+            </p>
           </div>
         </div>
       </div>
