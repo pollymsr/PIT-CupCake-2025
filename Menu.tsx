@@ -4,16 +4,14 @@ import { Button } from "src/components/ui/button";
 import { Card } from "src/components/ui/card";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { trpc } from "src/lib/trpc";
-import { useCart } from "./context/CartContext";
+import { useCart } from "@/context/CartContext";
 
 export default function Menu() {
-  // Use any temporariamente para bypass do TypeScript
   const { data: cupcakes, isLoading } = (trpc as any).cupcakes.list.useQuery();
   const { addToCart } = useCart();
   const [addedItems, setAddedItems] = useState<Set<string>>(new Set());
 
   const handleAddToCart = (cupcake: any) => {
-    // Criar o item do carrinho explicitamente como CartItem
     const cartItem = {
       id: cupcake._id,
       name: cupcake.name,
