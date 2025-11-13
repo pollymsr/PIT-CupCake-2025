@@ -1,5 +1,5 @@
 // auth/register.js - CORRIGIDO
-import { getUserByEmail, createUserWithPassword } from 'db.ts';
+import { getUserByEmail, createUserWithPassword } from '../../db.js';
 import bcrypt from 'bcryptjs';
 
 export default async function handler(req, res) {

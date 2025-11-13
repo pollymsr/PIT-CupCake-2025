@@ -1,9 +1,9 @@
-// App.tsx - VERSÃO CORRIGIDA
+// App.tsx - CORRIGIDO
 import React from 'react';
 import { Router, Route } from 'wouter';
 import Home from './Home';
 import Login from './Login';
-import Register from './api/auth/Register';
+import Register from './api/auth/register';
 import Menu from './Menu';
 import Checkout from './Checkout';
 import Contato from './Contato';

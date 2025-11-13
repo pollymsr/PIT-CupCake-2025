@@ -1,5 +1,5 @@
 // auth/login.js - CORRIGIDO
-import { getUserByEmail } from '../db.js';
+import { getUserByEmail } from '../../db.js';
 import bcrypt from 'bcryptjs';
 
 export default async function handler(req, res) {
