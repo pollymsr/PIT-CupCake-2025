@@ -1,6 +1,6 @@
-// Profile.tsx
+// Profile.tsx - VERSÃO CORRIGIDA
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter'; // ← REMOVI useLocation
 import { Cake, User, Mail, Package, Calendar, LogOut } from 'lucide-react';
 
 interface UserData {
@@ -26,7 +26,7 @@ export default function Profile() {
 
   const handleLogout = () => {
     localStorage.removeItem('currentUser');
-    window.location.href = '/'; // ← USE window.location.href (mais simples)
+    window.location.href = '/'; // ← USEI window.location.href
   };
 
   if (loading) {
