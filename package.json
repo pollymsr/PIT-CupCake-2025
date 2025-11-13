@@ -1,14 +1,16 @@
 {
   "name": "cupcake-pit-fullstack",
   "version": "1.0.0",
-  "license": "MIT",
+  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "dev": "npm run dev:client",
+    "dev:client": "vite",
+    "dev:server": "node server/index.js",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build",
+    "build:server": "mkdir -p dist/server && cp -r server/* dist/server/",
+    "preview": "vite preview",
+    "start": "node dist/server/index.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
@@ -23,7 +25,6 @@
     "cookie": "^1.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "drizzle-kit": "^0.31.6",
     "express": "^5.1.0",
     "jose": "^6.1.1",
     "lucide-react": "^0.553.0",
@@ -46,8 +47,6 @@
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.7.3",
-    "vite": "^2.9.16",
-    "vite-tsconfig-paths": "^4.0.0"
-  },
-  "private": true
+    "vite": "^2.9.16"
+  }
 }

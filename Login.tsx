@@ -1,6 +1,6 @@
-// Login.tsx - CORRIGIDO para Vercel
+// Login.tsx - COM BACKEND REAL
 import React, { useState } from 'react';
-import { Link, useLocation } from 'wouter'; // ✅ Adicione useLocation
+import { Link, useLocation } from 'wouter';
 import { Cake, LogIn, Mail, Lock, Eye, EyeOff, User, UserPlus } from 'lucide-react';
 import { useTestAuth } from './context/TestAuthContext';
 
@@ -15,7 +15,7 @@ export default function Login() {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
-  const [, setLocation] = useLocation(); // ✅ Hook para navegação
+  const [, setLocation] = useLocation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -24,68 +24,73 @@ export default function Login() {
     });
   };
 
-  // Função client-side para simular autenticação
+  // Função para autenticação com backend real
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simular delay de rede
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
     try {
       if (isLogin) {
-        // Login simples - em produção isso viria do backend
-        const users = JSON.parse(localStorage.getItem('pollyUsers') || '[]');
-        const user = users.find((u: any) => u.email === formData.email);
-        
-        if (user && user.password === formData.password) {
-          localStorage.setItem('currentUser', JSON.stringify(user));
+        // Login com backend
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
           alert('Login realizado com sucesso!');
-          setLocation('/profile'); // ✅ Use setLocation em vez de window.location.href
+          setLocation('/profile');
         } else {
-          alert('Credenciais inválidas!');
-          setLoading(false);
+          alert(data.message || 'Erro no login');
         }
       } else {
-        // Cadastro
+        // Cadastro com backend
         if (formData.password !== formData.confirmPassword) {
           alert('As senhas não coincidem!');
           setLoading(false);
           return;
         }
 
-        const users = JSON.parse(localStorage.getItem('pollyUsers') || '[]');
-        
-        if (users.find((u: any) => u.email === formData.email)) {
-          alert('Este e-mail já está cadastrado!');
-          setLoading(false);
-          return;
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+          alert('Cadastro realizado com sucesso!');
+          setLocation('/profile');
+        } else {
+          alert(data.message || 'Erro no cadastro');
         }
-
-        const newUser = {
-          id: Date.now().toString(),
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: 'user',
-          createdAt: new Date().toISOString()
-        };
-
-        users.push(newUser);
-        localStorage.setItem('pollyUsers', JSON.stringify(users));
-        localStorage.setItem('currentUser', JSON.stringify(newUser));
-
-        alert('Cadastro realizado com sucesso!');
-        setLocation('/profile'); // ✅ Use setLocation em vez de window.location.href
       }
     } catch (error) {
       console.error('Auth error:', error);
-      alert('Erro durante a autenticação.');
+      alert('Erro de conexão. Tente novamente.');
+    } finally {
       setLoading(false);
     }
   };
 
-  // ... o restante do código permanece igual
+  // ... (restante do JSX permanece igual)
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
