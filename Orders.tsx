@@ -1,213 +1,303 @@
-import { Link } from "wouter";
-import { ArrowLeft, Package } from "lucide-react";
-import { useAuth } from "./hooks/useAuth";
+// db.ts - CORRIGIDO SEM ERROS TYPESCRIPT
+import mongoose from 'mongoose';
 
-// Componentes locais
-const Button = ({ children, variant, size, className, ...props }: any) => (
-  <button 
-    className={`
-      inline-flex items-center justify-center rounded-md font-medium transition-colors
-      ${variant === 'ghost' ? 'bg-transparent hover:bg-gray-100' : 'bg-pink-500 text-white hover:bg-pink-600'}
-      ${size === 'icon' ? 'p-2' : 'px-4 py-2'}
-      ${size === 'sm' ? 'text-sm' : 'text-base'}
-      disabled:opacity-50 disabled:cursor-not-allowed
-      ${className}
-    `}
-    {...props}
-  >
-    {children}
-  </button>
-);
-
-const Card = ({ children, className, ...props }: any) => (
-  <div className={`bg-white rounded-lg border border-gray-200 shadow-sm p-6 ${className}`} {...props}>
-    {children}
-  </div>
-);
-
-// Mock do trpc
-const trpc = {
-  orders: {
-    list: {
-      useQuery: () => ({ 
-        data: [
-          {
-            _id: 'order_123456',
-            userId: 'user_123',
-            userName: 'João Silva',
-            status: 'delivered',
-            totalAmount: 45.80,
-            paymentMethod: 'credit',
-            customerCity: 'São Paulo',
-            items: [
-              { cupcakeId: '1', cupcakeName: 'Cupcake de Chocolate', quantity: 2, price: 11.5 },
-              { cupcakeId: '3', cupcakeName: 'Cupcake Red Velvet', quantity: 1, price: 12.0 }
-            ],
-            createdAt: '2024-01-15T10:30:00Z'
-          },
-          {
-            _id: 'order_123457',
-            userId: 'user_123',
-            userName: 'João Silva',
-            status: 'processing',
-            totalAmount: 32.90,
-            paymentMethod: 'pix',
-            customerCity: 'São Paulo',
-            items: [
-              { cupcakeId: '4', cupcakeName: 'Cupcake de Morango', quantity: 3, price: 10.5 }
-            ],
-            createdAt: '2024-01-20T14:20:00Z'
-          }
-        ], 
-        isLoading: false 
-      })
-    }
+// 1. Conexão com o Banco de Dados
+export async function connectDb() {
+  if (mongoose.connection.readyState === 1) {
+    console.log("[Database] Already connected.");
+    return;
   }
-};
 
-export default function Orders() {
-  const { isAuthenticated } = useAuth();
-  const { data: orders, isLoading } = (trpc as any).orders.list.useQuery(undefined, {
-    enabled: isAuthenticated,
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.error("DATABASE_URL is not set. Cannot connect to MongoDB.");
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  try {
+    await mongoose.connect(connectionString);
+    console.log("[Database] Connected to MongoDB successfully.");
+  } catch (error) {
+    console.error("[Database] Failed to connect to MongoDB:", error);
+    throw error;
+  }
+}
+
+// 2. Interfaces TypeScript
+interface IUser {
+  _id?: mongoose.Types.ObjectId;
+  openId: string;
+  name: string;
+  email: string;
+  password: string;
+  loginMethod: string;
+  lastSignedIn: Date;
+  role: 'user' | 'admin';
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface ICupcake {
+  _id?: mongoose.Types.ObjectId;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  available: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface IOrderItem {
+  cupcakeId: mongoose.Types.ObjectId;
+  quantity: number;
+  price: number;
+}
+
+interface IOrder {
+  _id?: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  userName: string;
+  totalAmount: number;
+  items: IOrderItem[];
+  status: 'pending' | 'confirmed' | 'delivered';
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// 3. Definir os Schemas
+const UserSchema = new mongoose.Schema<IUser>({
+  openId: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  loginMethod: { type: String, default: 'email' },
+  lastSignedIn: { type: Date, default: Date.now },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+}, { 
+  timestamps: true 
+});
+
+const CupcakeSchema = new mongoose.Schema<ICupcake>({
+  name: { type: String, required: true },
+  description: { type: String, required: true },
+  price: { type: Number, required: true },
+  image: { type: String, required: true },
+  category: { type: String, default: 'artesanal' },
+  available: { type: Boolean, default: true }
+}, { 
+  timestamps: true 
+});
+
+const OrderItemSchema = new mongoose.Schema<IOrderItem>({
+  cupcakeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Cupcake', required: true },
+  quantity: { type: Number, required: true, min: 1 },
+  price: { type: Number, required: true }
+});
+
+const OrderSchema = new mongoose.Schema<IOrder>({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userName: { type: String, required: true },
+  totalAmount: { type: Number, required: true },
+  items: [OrderItemSchema],
+  status: { type: String, enum: ['pending', 'confirmed', 'delivered'], default: 'pending' }
+}, { 
+  timestamps: true 
+});
+
+// 4. Models com tipagem correta
+const UserModel = mongoose.models.User as mongoose.Model<IUser> || mongoose.model<IUser>('User', UserSchema);
+const CupcakeModel = mongoose.models.Cupcake as mongoose.Model<ICupcake> || mongoose.model<ICupcake>('Cupcake', CupcakeSchema);
+const OrderModel = mongoose.models.Order as mongoose.Model<IOrder> || mongoose.model<IOrder>('Order', OrderSchema);
+
+export const User = UserModel;
+export const Cupcake = CupcakeModel;
+export const Order = OrderModel;
+
+// 5. Funções de Acesso a Dados (CRUD)
+
+// Usuários
+export async function upsertUser(user: Partial<IUser> & { openId: string }): Promise<IUser | null> {
+  await connectDb();
+  const { openId, ...updateFields } = user;
+
+  const result = await UserModel.findOneAndUpdate(
+    { openId },
+    {
+      $set: {
+        ...updateFields,
+        lastSignedIn: new Date(),
+      },
+      $setOnInsert: {
+        openId,
+        role: updateFields.role || 'user',
+      }
+    },
+    {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+    }
+  );
+  return result;
+}
+
+export async function getUserByOpenId(openId: string): Promise<IUser | null> {
+  await connectDb();
+  return UserModel.findOne({ openId });
+}
+
+export async function getUserByEmail(email: string): Promise<IUser | null> {
+  await connectDb();
+  return UserModel.findOne({ email: email.toLowerCase() });
+}
+
+export async function createUserWithPassword(userData: {
+  name: string;
+  email: string;
+  password: string;
+}): Promise<IUser> {
+  await connectDb();
+  
+  const user = new UserModel({
+    openId: userData.email,
+    name: userData.name,
+    email: userData.email,
+    password: userData.password,
+    loginMethod: 'email',
+    role: 'user'
   });
 
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      pending: "⏳ Pendente",
-      processing: "⚙️ Em Processamento",
-      shipped: "🚚 Enviado",
-      delivered: "✅ Entregue",
-    };
-    return labels[status] || status;
-  };
+  await user.save();
+  return user.toObject();
+}
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      pending: "bg-yellow-100 text-yellow-800",
-      processing: "bg-blue-100 text-blue-800",
-      shipped: "bg-purple-100 text-purple-800",
-      delivered: "bg-green-100 text-green-800",
-    };
-    return colors[status] || "bg-gray-100 text-gray-800";
-  };
+// Cupcakes
+export async function getAllCupcakes(): Promise<ICupcake[]> {
+  await connectDb();
+  const cupcakes = await CupcakeModel.find().sort({ name: 1 });
+  return cupcakes.map(cupcake => cupcake.toObject());
+}
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
-        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-pink-100 shadow-sm">
-          <div className="container mx-auto px-4 py-4 flex items-center">
-            <h1 className="text-2xl font-bold">Meus Pedidos</h1>
-          </div>
-        </header>
+export async function getCupcakeById(id: string): Promise<ICupcake | null> {
+  await connectDb();
+  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+  const cupcake = await CupcakeModel.findById(id);
+  return cupcake ? cupcake.toObject() : null;
+}
 
-        <main className="container mx-auto px-4 py-12 text-center">
-          <p className="text-xl text-gray-600 mb-6">Você precisa estar logado para ver seus pedidos</p>
-          <Link href="/">
-            <Button className="bg-gradient-to-r from-pink-500 to-pink-600">
-              Voltar para Home
-            </Button>
-          </Link>
-        </main>
-      </div>
-    );
+// Popular dados iniciais de cupcakes
+export async function seedCupcakes(): Promise<{ message: string; count: number }> {
+  await connectDb();
+  
+  const cupcakes = [
+    {
+      name: "Chocolate Belga",
+      description: "Cupcake artesanal com chocolate belga premium",
+      price: 12.90,
+      image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=300&fit=crop&q=80",
+      category: "chocolate"
+    },
+    {
+      name: "Morango Fresco",
+      description: "Cupcake com recheio de morangos frescos",
+      price: 11.90,
+      image: "https://images.unsplash.com/photo-1551026941-874221147774?w=400&h=300&fit=crop&q=80",
+      category: "frutas"
+    },
+    {
+      name: "Baunilha Francesa",
+      description: "Cupcake com essência de baunilha francesa",
+      price: 10.90,
+      image: "https://images.unsplash.com/photo-1576618148400-9596041e2475?w=400&h=300&fit=crop&q=80",
+      category: "clássico"
+    },
+    {
+      name: "Red Velvet",
+      description: "Cupcake red velvet com cream cheese",
+      price: 13.90,
+      image: "https://images.unsplash.com/photo-1588195538326-c2b1e6170f67?w=400&h=300&fit=crop&q=80",
+      category: "especial"
+    },
+    {
+      name: "Limão Siciliano",
+      description: "Cupcake refrescante de limão siciliano",
+      price: 11.50,
+      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop&q=80",
+      category: "frutas"
+    },
+    {
+      name: "Café Especial",
+      description: "Cupcake com grãos de café especial",
+      price: 12.50,
+      image: "https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=400&h=300&fit=crop&q=80",
+      category: "especial"
+    },
+    {
+      name: "Nutella Cremoso",
+      description: "Cupcake com recheio cremoso de Nutella",
+      price: 14.90,
+      image: "https://images.unsplash.com/photo-1519861155730-0a1f0d5c4a8a?w=400&h=300&fit=crop&q=80",
+      category: "chocolate"
+    },
+    {
+      name: "Coco Tropical",
+      description: "Cupcake com coco fresco e leite condensado",
+      price: 12.90,
+      image: "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=400&h=300&fit=crop&q=80",
+      category: "tropical"
+    }
+  ];
+
+  let successCount = 0;
+  
+  for (const cupcakeData of cupcakes) {
+    try {
+      await CupcakeModel.findOneAndUpdate(
+        { name: cupcakeData.name },
+        cupcakeData,
+        { upsert: true, new: true }
+      );
+      console.log(`✅ Cupcake "${cupcakeData.name}" adicionado/atualizado`);
+      successCount++;
+    } catch (error) {
+      console.error(`❌ Erro ao adicionar cupcake "${cupcakeData.name}":`, error);
+    }
   }
+  
+  console.log(`🎉 ${successCount} cupcakes foram populados no banco!`);
+  return { message: "Cupcakes populados com sucesso!", count: successCount };
+}
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-pink-100 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <h1 className="text-2xl font-bold">Meus Pedidos</h1>
-          </div>
-          <Link href="/menu">
-            <Button className="bg-gradient-to-r from-pink-500 to-pink-600">
-              Novo Pedido
-            </Button>
-          </Link>
-        </div>
-      </header>
+// Pedidos
+export async function createOrder(orderData: { 
+  userId: string; 
+  userName: string; 
+  totalAmount: number; 
+  items: IOrderItem[];
+}): Promise<IOrder> {
+  await connectDb();
+  const order = new OrderModel({
+    ...orderData,
+    userId: new mongoose.Types.ObjectId(orderData.userId),
+  });
+  await order.save();
+  return order.toObject();
+}
 
-      {/* Orders List */}
-      <main className="container mx-auto px-4 py-12">
-        {isLoading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-gray-200 rounded-lg h-32 animate-pulse" />
-            ))}
-          </div>
-        ) : orders && orders.length > 0 ? (
-          <div className="space-y-4">
-            {orders.map((order: any) => (
-              <Card key={order._id} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold">Pedido #{order._id.slice(-6)}</h3>
-                    <p className="text-gray-600 text-sm">
-                      {new Date(order.createdAt).toLocaleDateString("pt-BR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                  <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                    {getStatusLabel(order.status)}
-                  </span>
-                </div>
+export async function getOrderById(id: string): Promise<IOrder | null> {
+  await connectDb();
+  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+  const order = await OrderModel.findById(id).populate('items.cupcakeId');
+  return order ? order.toObject() : null;
+}
 
-                <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                  <div>
-                    <p className="text-gray-600">Cliente</p>
-                    <p className="font-medium">{order.userName}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Método de Pagamento</p>
-                    <p className="font-medium">{order.paymentMethod === "credit" ? "Cartão de Crédito" : "PIX"}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Endereço</p>
-                    <p className="font-medium">{order.customerCity}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Total</p>
-                    <p className="font-bold text-pink-600">R$ {order.totalAmount.toFixed(2)}</p>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <p className="text-sm text-gray-600 mb-2">Itens do Pedido</p>
-                  <div className="space-y-2">
-                    {order.items?.map((item: any, index: number) => (
-                      <div key={index} className="flex justify-between text-sm">
-                        <span>{item.quantity}x {item.cupcakeName}</span>
-                        <span>R$ {(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-xl text-gray-600 mb-6">Você ainda não tem pedidos</p>
-            <Link href="/menu">
-              <Button className="bg-gradient-to-r from-pink-500 to-pink-600">
-                Fazer Primeiro Pedido
-              </Button>
-            </Link>
-          </div>
-        )}
-      </main>
-    </div>
-  );
+export async function getUserOrders(userId: string): Promise<IOrder[]> {
+  await connectDb();
+  if (!mongoose.Types.ObjectId.isValid(userId)) return [];
+  const orders = await OrderModel.find({ 
+    userId: new mongoose.Types.ObjectId(userId) 
+  }).sort({ createdAt: -1 });
+  return orders.map(order => order.toObject());
 }
