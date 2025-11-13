@@ -154,35 +154,35 @@ export async function seedCupcakes() {
       name: "Morango Fresco",
       description: "Cupcake com recheio de morangos frescos",
       price: 11.90,
-      image: "https://images.unsplash.com/photo-1551026941-874221147774?w=300&h=300&fit=crop&q=80",
+      image: "https://unsplash.com/pt-br/fotografias/cupcake-com-cereja-rosa-por-cima-FAnSK-gVGZU",
       category: "frutas"
     },
     {
       name: "Baunilha Francesa",
       description: "Cupcake com essência de baunilha francesa",
       price: 10.90,
-      image: "https://images.unsplash.com/photo-1576618148400-9596041e2475?w=300&h=300&fit=crop&q=80",
+      image: "https://unsplash.com/pt-br/fotografias/um-monte-de-cupcakes-com-cobertura-branca-e-polvilho-07Z9Sgv_0cM",
       category: "clássico"
     },
     {
       name: "Red Velvet",
       description: "Cupcake red velvet com cream cheese",
       price: 13.90,
-      image: "https://images.unsplash.com/photo-1588195538326-c2b1e6170f67?w=300&h=300&fit=crop&q=80",
+      image: "https://unsplash.com/pt-br/fotografias/cupcake-branco-e-vermelho-com-cereja-branca-por-cima-MJPr6nOdppw",
       category: "especial"
     },
     {
       name: "Limão Siciliano",
       description: "Cupcake refrescante de limão siciliano",
       price: 11.50,
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop&q=80",
+      image: "https://unsplash.com/pt-br/fotografias/tampo-de-cupcake-com-creme-no-suporte-de-cupcake-amarelo-Ltv7a5m8i4c",
       category: "frutas"
     },
     {
       name: "Café Especial",
       description: "Cupcake com grãos de café especial",
       price: 12.50,
-      image: "https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=300&h=300&fit=crop&q=80",
+      image: "https://unsplash.com/pt-br/fotografias/close-up-fotografia-de-cupcakes-zk-fclJdGas",
       category: "especial"
     }
   ];
