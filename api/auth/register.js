@@ -1,56 +1,6 @@
-import mongoose from 'mongoose';
+// auth/register.js - CORRIGIDO
+import { getUserByEmail, createUserWithPassword } from '../db.js';
 import bcrypt from 'bcryptjs';
-
-const DATABASE_URL = process.env.DATABASE_URL;
-
-// Cache da conexão MongoDB para serverless
-let cached = global.mongoose;
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
-  }
-
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    };
-
-    cached.promise = mongoose.connect(DATABASE_URL, opts).then((mongoose) => {
-      return mongoose;
-    });
-  }
-
-  try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
-  }
-
-  return cached.conn;
-}
-
-// Schema do User
-const UserSchema = new mongoose.Schema({
-  openId: { type: String, required: true, unique: true },
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  loginMethod: { type: String, default: 'email' },
-  lastSignedIn: { type: Date, default: Date.now },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' },
-}, { 
-  timestamps: true 
-});
-
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
 
 export default async function handler(req, res) {
   // CORS headers
@@ -69,7 +19,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    await connectDB();
     console.log('📝 Tentativa de registro');
     
     const { name, email, password } = req.body;
@@ -82,21 +31,18 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'A senha deve ter pelo menos 6 caracteres' });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await getUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ message: 'Este e-mail já está cadastrado' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const user = new User({
-      openId: email,
+    const user = await createUserWithPassword({
       name,
       email,
       password: hashedPassword
     });
-
-    await user.save();
 
     const userResponse = {
       _id: user._id,
