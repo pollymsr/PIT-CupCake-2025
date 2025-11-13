@@ -62,7 +62,6 @@ export default function Home() {
       <header className="sticky top-0 z-50 bg-white shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            {/* Usando um ícone mais elegante como fallback se APP_LOGO não for uma imagem */}
             <Cake className="w-8 h-8 text-pink-600" /> 
             <h1 className="text-2xl font-extrabold text-gray-800 tracking-tight">{APP_TITLE || "Polly's Cupcakes"}</h1>
           </div>
@@ -70,32 +69,31 @@ export default function Home() {
             <Link href="/menu" className="text-gray-600 hover:text-pink-600 transition-colors font-medium">
               Cardápio
             </Link>
-            <a href="#" className="text-gray-600 hover:text-pink-600 transition-colors font-medium">
+            <Link href="/sobre" className="text-gray-600 hover:text-pink-600 transition-colors font-medium">
               Sobre Nós
-            </a>
-            <a href="#" className="text-gray-600 hover:text-pink-600 transition-colors font-medium">
+            </Link>
+            <Link href="/contato" className="text-gray-600 hover:text-pink-600 transition-colors font-medium">
               Contato
-            </a>
+            </Link>
             <Link href="/checkout" className="flex items-center space-x-1 text-gray-600 hover:text-pink-600 transition-colors">
               <ShoppingCart className="w-5 h-5" />
               <span className="hidden sm:inline">Carrinho (0)</span>
             </Link>
-            <button 
-              onClick={loginAsTestUser}
+            <Link 
+              href="/login"
               className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center space-x-2 text-sm font-semibold"
             >
               <LogIn className="w-4 h-4" />
               <span>Entrar</span>
-            </button>
+            </Link>
           </nav>
         </div>
       </header>
 
-      {/* Hero Section - Mais Impactante */}
+      {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-pink-50 to-purple-100 py-20 md:py-32 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Conteúdo de Texto */}
             <div>
               <p className="text-sm font-semibold text-pink-600 uppercase mb-2 tracking-widest">
                 Onde a doçura encontra a arte
@@ -111,12 +109,14 @@ export default function Home() {
                   <span>Ver Cardápio Completo</span>
                   <ChevronRight className="w-5 h-5" />
                 </Link>
-                <button className="border-2 border-pink-600 text-pink-600 px-8 py-4 rounded-full hover:bg-pink-600 hover:text-white transition-colors duration-300 font-semibold text-lg">
+                <Link 
+                  href="/sobre" 
+                  className="border-2 border-pink-600 text-pink-600 px-8 py-4 rounded-full hover:bg-pink-600 hover:text-white transition-colors duration-300 font-semibold text-lg"
+                >
                   Nossas Histórias
-                </button>
+                </Link>
               </div>
             </div>
-            {/* Imagem Aprimorada */}
             <div className="relative hidden md:block">
               <div className="absolute inset-0 bg-pink-200 rounded-full opacity-50 blur-3xl transform scale-150"></div>
               <img 
@@ -129,7 +129,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section - Mais Profissional */}
+      {/* Features Section */}
       <section className="bg-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-extrabold text-center text-gray-900 mb-16">
@@ -155,7 +155,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Popular Flavors - Mais Comercial e Apetitoso */}
+      {/* Popular Flavors */}
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-extrabold text-center text-gray-900 mb-16">
@@ -191,7 +191,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section - Novo e Comercial */}
+      {/* Testimonials Section */}
       <section className="bg-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-extrabold text-center text-gray-900 mb-16">
@@ -214,7 +214,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section - Mais Enfatizado */}
+      {/* CTA Section */}
       <section className="bg-pink-600 py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-extrabold text-white mb-4">
