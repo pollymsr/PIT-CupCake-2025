@@ -1,4 +1,5 @@
-import { useState } from "react";
+// Checkout.tsx - CORRIGIDO
+import React, { useState } from "react"; // ← ADICIONE React AQUI
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useCart } from "./context/CartContext";
