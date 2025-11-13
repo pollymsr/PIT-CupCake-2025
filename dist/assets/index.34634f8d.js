@@ -8214,12 +8214,19 @@ const __iconNode = [
 const User$1 = createLucideIcon("user", __iconNode);
 const TestAuthContext = react.exports.createContext(void 0);
 function TestAuthProvider({ children }) {
+  const [isTestUser, setIsTestUser] = react.exports.useState(false);
   const loginAsTestUser = () => {
-    console.log("Test user login - implementar l\xF3gica real");
+    setIsTestUser(true);
+    console.log("\u2705 Logado como usu\xE1rio teste");
     localStorage.setItem("test-user", "true");
   };
-  return /* @__PURE__ */ React.createElement(TestAuthContext.Provider, {
-    value: { loginAsTestUser }
+  const logoutTestUser = () => {
+    setIsTestUser(false);
+    console.log("\u{1F6AA} Logout do usu\xE1rio teste");
+    localStorage.removeItem("test-user");
+  };
+  return /* @__PURE__ */ React$2.createElement(TestAuthContext.Provider, {
+    value: { isTestUser, loginAsTestUser, logoutTestUser }
   }, children);
 }
 function useTestAuth() {
@@ -27971,14 +27978,26 @@ var browser_umd = { exports: {} };
   })());
 })(browser_umd);
 var mongoose = /* @__PURE__ */ getDefaultExportFromCjs(browser_umd.exports);
+function isConnected() {
+  return mongoose.connection.readyState === 1;
+}
 async function connectDb() {
-  if (mongoose.connection.readyState === 1)
+  if (isConnected()) {
+    console.log("[Database] Already connected.");
     return;
+  }
   const connectionString = {}.DATABASE_URL;
-  if (!connectionString)
+  if (!connectionString) {
+    console.error("\u274C DATABASE_URL is not set. Cannot connect to MongoDB.");
     throw new Error("DATABASE_URL is not set");
-  await mongoose.connect(connectionString);
-  console.log("[Database] Connected to MongoDB");
+  }
+  try {
+    await mongoose.connect(connectionString);
+    console.log("\u2705 [Database] Connected to MongoDB successfully.");
+  } catch (error) {
+    console.error("\u274C [Database] Failed to connect to MongoDB:", error);
+    throw error;
+  }
 }
 const UserSchema = new mongoose.Schema({
   openId: { type: String, required: true, unique: true },
@@ -27988,22 +28007,23 @@ const UserSchema = new mongoose.Schema({
   loginMethod: { type: String, default: "email" },
   role: { type: String, default: "user" }
 }, { timestamps: true });
-const CupcakeSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  price: { type: Number, required: true },
-  image: { type: String, required: true },
-  category: { type: String, default: "artesanal" },
-  available: { type: Boolean, default: true }
-}, { timestamps: true });
-const User = mongoose.models.User || mongoose.model("User", UserSchema);
-mongoose.models.Cupcake || mongoose.model("Cupcake", CupcakeSchema);
+let UserModel;
+try {
+  UserModel = mongoose.model("User");
+} catch {
+  UserModel = mongoose.model("User", UserSchema);
+}
+const User = UserModel;
 async function getUserByEmail(email) {
-  await connectDb();
+  if (!isConnected()) {
+    await connectDb();
+  }
   return User.findOne({ email: email.toLowerCase() });
 }
 async function createUserWithPassword(userData) {
-  await connectDb();
+  if (!isConnected()) {
+    await connectDb();
+  }
   const user = new User({
     openId: userData.email,
     name: userData.name,

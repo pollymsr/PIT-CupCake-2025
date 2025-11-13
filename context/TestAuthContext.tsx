@@ -1,19 +1,31 @@
-import { createContext, useContext, ReactNode } from 'react';
+// context/TestAuthContext.tsx - CORRIGIDO
+import React, { createContext, useContext, useState, ReactNode } from 'react'; // ← ADICIONE React e useState
 
 interface TestAuthContextType {
+  isTestUser: boolean;
   loginAsTestUser: () => void;
+  logoutTestUser: () => void;
 }
 
 const TestAuthContext = createContext<TestAuthContextType | undefined>(undefined);
 
 export function TestAuthProvider({ children }: { children: ReactNode }) {
+  const [isTestUser, setIsTestUser] = useState(false); // ← useState precisa ser importado
+
   const loginAsTestUser = () => {
-    console.log('Test user login - implementar lógica real');
+    setIsTestUser(true);
+    console.log('✅ Logado como usuário teste');
     localStorage.setItem('test-user', 'true');
   };
 
+  const logoutTestUser = () => {
+    setIsTestUser(false);
+    console.log('🚪 Logout do usuário teste');
+    localStorage.removeItem('test-user');
+  };
+
   return (
-    <TestAuthContext.Provider value={{ loginAsTestUser }}>
+    <TestAuthContext.Provider value={{ isTestUser, loginAsTestUser, logoutTestUser }}>
       {children}
     </TestAuthContext.Provider>
   );
