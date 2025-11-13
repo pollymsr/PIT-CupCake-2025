@@ -57,7 +57,7 @@ export default function Home() {
   const testimonials = [
     { quote: "Os melhores cupcakes que já comi! O Red Velvet é simplesmente divino.", author: "Ana C.", rating: 5 },
     { quote: "Entrega super rápida e vieram perfeitos. Recomendo a todos!", author: "Bruno M.", rating: 5 },
-    { quote: "Qualidade impecável e sabores muito criativos. Virei cliente fiel!", author: "Carla S.", rating: 5 },
+    { quote: "Qualidade impecável e sabores muito criativos. Virei cliente fiel!", author: "Guilherme F.", rating: 5 },
   ];
   // --- Fim Dados Aprimorados ---
 
