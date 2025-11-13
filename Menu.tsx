@@ -1,4 +1,6 @@
+//menu.tsx
 import { useState } from "react";
+import React from 'react';
 import { Link } from "wouter";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { useCart } from "./context/CartContext";

@@ -1,5 +1,6 @@
 // db.ts - CORRIGIDO SEM ERROS TYPESCRIPT
 import mongoose from "mongoose";
+import React, { useState } from "react";
 
 // 1. Conexão com o Banco de Dados
 export async function connectDb() {
