@@ -14,7 +14,7 @@ async function run() {
   if (count === 0) {
     console.log('Seeding sample cupcakes...');
     await Cupcake.create([
-       {
+  {
     name: 'Cupcake de Baunilha',
     description: 'Massa de baunilha aromática com buttercream suave',
     price: 9.9,

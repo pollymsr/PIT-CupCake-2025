@@ -28,11 +28,31 @@ export default function Home() {
   ];
 
   const popularFlavors = [
-    { name: "Chocolate Belga", price: "R$ 12,90", color: "bg-amber-900", image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1" },
-    { name: "Morango Fresco", price: "R$ 11,90", color: "bg-pink-500", image: "https://images.unsplash.com/photo-1551026941-874221147774?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1" },
-    { name: "Baunilha Francesa", price: "R$ 10,90", color: "bg-yellow-100", image: "https://images.unsplash.com/photo-1576618148400-9596041e2475?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1" },
-    { name: "Red Velvet", price: "R$ 13,90", color: "bg-red-600", image: "https://images.unsplash.com/photo-1588195538326-c2b1e6170f67?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1" }
-  ];
+  { 
+    name: "Chocolate Belga", 
+    price: "R$ 12,90", 
+    color: "bg-amber-900", 
+    image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
+  },
+  { 
+    name: "Morango Fresco", 
+    price: "R$ 11,90", 
+    color: "bg-pink-500", 
+    image: "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
+  },
+  { 
+    name: "Baunilha Francesa", 
+    price: "R$ 10,90", 
+    color: "bg-yellow-100", 
+    image: "https://images.unsplash.com/photo-1576618148400-f54ade99c7c3?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
+  },
+  { 
+    name: "Red Velvet", 
+    price: "R$ 13,90", 
+    color: "bg-red-600", 
+    image: "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
+  }
+];
 
   const testimonials = [
     { quote: "Os melhores cupcakes que já comi! O Red Velvet é simplesmente divino.", author: "Ana C.", rating: 5 },
