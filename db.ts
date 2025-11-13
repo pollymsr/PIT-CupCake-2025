@@ -1,4 +1,4 @@
-// db.ts - CORRIGIDO COM IMAGENS VÁLIDAS
+// db.ts - VERSÃO SIMPLIFICADA SEM ERROS
 import mongoose from 'mongoose';
 
 // 1. Conexão com o Banco de Dados
@@ -23,7 +23,7 @@ export async function connectDb() {
   }
 }
 
-// 2. Definir os Schemas aqui mesmo (simplificado)
+// 2. Schemas sem tipagem complexa
 const UserSchema = new mongoose.Schema({
   openId: { type: String, required: true, unique: true },
   name: { type: String, required: true },
@@ -63,19 +63,39 @@ const OrderSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-// Models - CORREÇÃO: Usar type assertion para evitar erros TypeScript
-export const User = (mongoose.models.User as mongoose.Model<any>) || mongoose.model('User', UserSchema);
-export const Cupcake = (mongoose.models.Cupcake as mongoose.Model<any>) || mongoose.model('Cupcake', CupcakeSchema);
-export const Order = (mongoose.models.Order as mongoose.Model<any>) || mongoose.model('Order', OrderSchema);
+// 3. Models com abordagem mais simples
+let User: mongoose.Model<any>;
+let Cupcake: mongoose.Model<any>;
+let Order: mongoose.Model<any>;
 
-// 3. Funções de Acesso a Dados (CRUD)
+try {
+  User = mongoose.model('User');
+} catch {
+  User = mongoose.model('User', UserSchema);
+}
+
+try {
+  Cupcake = mongoose.model('Cupcake');
+} catch {
+  Cupcake = mongoose.model('Cupcake', CupcakeSchema);
+}
+
+try {
+  Order = mongoose.model('Order');
+} catch {
+  Order = mongoose.model('Order', OrderSchema);
+}
+
+export { User, Cupcake, Order };
+
+// 4. Funções de Acesso a Dados - Versão Simplificada
 
 // Usuários
 export async function upsertUser(user: any): Promise<any> {
   await connectDb();
   const { openId, ...updateFields } = user;
 
-  const result = await User.findOneAndUpdate(
+  const result = await (User as any).findOneAndUpdate(
     { openId },
     {
       $set: {
@@ -98,12 +118,12 @@ export async function upsertUser(user: any): Promise<any> {
 
 export async function getUserByOpenId(openId: string): Promise<any> {
   await connectDb();
-  return User.findOne({ openId });
+  return (User as any).findOne({ openId });
 }
 
 export async function getUserByEmail(email: string): Promise<any> {
   await connectDb();
-  return User.findOne({ email: email.toLowerCase() });
+  return (User as any).findOne({ email: email.toLowerCase() });
 }
 
 export async function createUserWithPassword(userData: {
@@ -129,17 +149,17 @@ export async function createUserWithPassword(userData: {
 // Cupcakes
 export async function getAllCupcakes(): Promise<any[]> {
   await connectDb();
-  return Cupcake.find().sort({ name: 1 });
+  return (Cupcake as any).find().sort({ name: 1 });
 }
 
 export async function getCupcakeById(id: string): Promise<any> {
   await connectDb();
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
-  return Cupcake.findById(id);
+  return (Cupcake as any).findById(id);
 }
 
-// Popular dados iniciais de cupcakes - CORRIGIDO COM IMAGENS VÁLIDAS
-export async function seedCupcakes() {
+// Popular dados iniciais de cupcakes
+export async function seedCupcakes(): Promise<{ message: string; count: number }> {
   await connectDb();
   
   const cupcakes = [
@@ -201,25 +221,33 @@ export async function seedCupcakes() {
     }
   ];
 
-  for (const cupcake of cupcakes) {
+  let successCount = 0;
+  
+  for (const cupcakeData of cupcakes) {
     try {
-      await Cupcake.findOneAndUpdate(
-        { name: cupcake.name },
-        cupcake,
+      await (Cupcake as any).findOneAndUpdate(
+        { name: cupcakeData.name },
+        cupcakeData,
         { upsert: true, new: true }
       );
-      console.log(`✅ Cupcake "${cupcake.name}" adicionado/atualizado`);
+      console.log(`✅ Cupcake "${cupcakeData.name}" adicionado/atualizado`);
+      successCount++;
     } catch (error) {
-      console.error(`❌ Erro ao adicionar cupcake "${cupcake.name}":`, error);
+      console.error(`❌ Erro ao adicionar cupcake "${cupcakeData.name}":`, error);
     }
   }
   
-  console.log("🎉 Todos os cupcakes foram populados no banco!");
-  return { message: "Cupcakes populados com sucesso!", count: cupcakes.length };
+  console.log(`🎉 ${successCount} cupcakes foram populados no banco!`);
+  return { message: "Cupcakes populados com sucesso!", count: successCount };
 }
 
 // Pedidos
-export async function createOrder(orderData: { userId: string, userName: string, totalAmount: number, items: any[] }): Promise<any> {
+export async function createOrder(orderData: { 
+  userId: string; 
+  userName: string; 
+  totalAmount: number; 
+  items: any[];
+}): Promise<any> {
   await connectDb();
   const order = new Order({
     ...orderData,
@@ -232,11 +260,13 @@ export async function createOrder(orderData: { userId: string, userName: string,
 export async function getOrderById(id: string): Promise<any> {
   await connectDb();
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
-  return Order.findById(id).populate('items.cupcakeId');
+  return (Order as any).findById(id).populate('items.cupcakeId');
 }
 
 export async function getUserOrders(userId: string): Promise<any[]> {
   await connectDb();
   if (!mongoose.Types.ObjectId.isValid(userId)) return [];
-  return Order.find({ userId: new mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 });
+  return (Order as any).find({ 
+    userId: new mongoose.Types.ObjectId(userId) 
+  }).sort({ createdAt: -1 });
 }
