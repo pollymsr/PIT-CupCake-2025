@@ -39,7 +39,7 @@ const trpc = {
             name: 'Cupcake de Baunilha',
             description: 'Macio e leve',
             price: 9.9,
-            imageUrl: '/images/vanilla.jpg',
+            imageUrl: 'https://images.unsplash.com/photo-1563805042-7684e8d2ce8d?w=400&h=400&fit=crop',
             available: true
           },
           {
@@ -47,7 +47,7 @@ const trpc = {
             name: 'Cupcake de Chocolate',
             description: 'Intenso e cremoso',
             price: 11.5,
-            imageUrl: '/images/chocolate.jpg',
+            imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop',
             available: true
           },
           {
@@ -55,7 +55,7 @@ const trpc = {
             name: 'Cupcake Red Velvet',
             description: 'Clássico red velvet',
             price: 12.0,
-            imageUrl: '/images/redvelvet.jpg',
+            imageUrl: 'https://images.unsplash.com/photo-1601924638867-3ecdf11c8844?w=400&h=400&fit=crop',
             available: true
           },
           {
@@ -63,7 +63,7 @@ const trpc = {
             name: 'Cupcake de Morango',
             description: 'Fresco e frutado',
             price: 10.5,
-            imageUrl: '/images/strawberry.jpg',
+            imageUrl: 'https://images.unsplash.com/photo-1563805042-7684e8d2ce8d?w=400&h=400&fit=crop',
             available: true
           },
           {
@@ -71,7 +71,7 @@ const trpc = {
             name: 'Cupcake de Limão',
             description: 'Refrescante e cítrico',
             price: 9.5,
-            imageUrl: '/images/lemon.jpg',
+            imageUrl: 'https://images.unsplash.com/photo-1559599189-578d4a3c94de?w=400&h=400&fit=crop',
             available: true
           },
           {
@@ -79,7 +79,7 @@ const trpc = {
             name: 'Cupcake de Café',
             description: 'Energético e aromático',
             price: 11.0,
-            imageUrl: '/images/coffee.jpg',
+            imageUrl: 'https://images.unsplash.com/photo-1556911220-e15b29be8c17?w=400&h=400&fit=crop',
             available: true
           }
         ], 

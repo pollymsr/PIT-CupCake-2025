@@ -14,7 +14,6 @@ interface UserData {
 export default function Profile() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [, setLocation] = useLocation(); // ✅ Hook para navegação
 
   useEffect(() => {
     // Recuperar dados do usuário do localStorage
@@ -27,7 +26,7 @@ export default function Profile() {
 
   const handleLogout = () => {
     localStorage.removeItem('currentUser');
-    setLocation('/'); // ✅ Use setLocation em vez de window.location.href
+    window.location.href = '/'; // ← USE window.location.href (mais simples)
   };
 
   if (loading) {
