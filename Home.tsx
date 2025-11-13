@@ -44,7 +44,7 @@ export default function Home() {
     name: "Baunilha Francesa", 
     price: "R$ 10,90", 
     color: "bg-yellow-100", 
-    image: "https://images.unsplash.com/photo-1576618148400-f54ade99c7c3?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
+    image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&h=300&fit=crop&q=80&fm=jpg&crop=entropy&cs=tinysrgb"
   },
   { 
     name: "Red Velvet", 
