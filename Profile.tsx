@@ -1,9 +1,9 @@
-// Profile.tsx
 import React from 'react'
 import { Link } from 'wouter'
 import { ArrowLeft } from 'lucide-react'
 import { useAuth } from './hooks/useAuth'
 
+// Componentes locais
 const Button = ({ children, variant, size, className, ...props }: any) => (
   <button 
     className={`
