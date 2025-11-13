@@ -1,5 +1,4 @@
-// auth/login.js - CORRIGIDO
-import { getUserByEmail } from '../../db.js';
+import { getUserByEmail, isConnected } from '../../db.js';
 import bcrypt from 'bcryptjs';
 
 export default async function handler(req, res) {
@@ -21,6 +20,11 @@ export default async function handler(req, res) {
   try {
     console.log('🔐 Tentativa de login');
     
+    // Verificar se o banco está conectado
+    if (!isConnected()) {
+      console.log('📡 Tentando conectar ao banco...');
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -37,7 +41,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Credenciais inválidas' });
     }
 
-    // Atualizar último login
     user.lastSignedIn = new Date();
     await user.save();
 
@@ -58,6 +61,15 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Login error:', error);
+    
+    // Erro específico de conexão com o banco
+    if (error.message.includes('DATABASE_URL') || error.message.includes('connect')) {
+      return res.status(500).json({ 
+        message: 'Erro de conexão com o banco de dados',
+        error: 'Serviço temporariamente indisponível'
+      });
+    }
+    
     res.status(500).json({ 
       message: 'Erro interno do servidor',
       error: error.message 
